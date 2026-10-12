@@ -163,8 +163,8 @@ function calculate() {
 }
 
 function goal() {
-  const cur = parseFloat($("gCur").value) \vert{}\vert{} 0, done = parseInt($("gDone").value) || 0;
-  const rem = parseInt($("gRem").value) \vert{}\vert{} 0, tgt = parseFloat($("gTgt").value) || 0;
+  const cur = parseFloat($("gCur").value) || 0, done = parseInt($("gDone").value) || 0;
+  const rem = parseInt($("gRem").value) || 0, tgt = parseFloat($("gTgt").value) || 0;
   if (rem < 1) { alert("لازم يكون فيه مادة باقية على الأقل"); return; }
   const need = (tgt * (done + rem) - cur * done) / rem;
   $("gOut").textContent = need > 100
