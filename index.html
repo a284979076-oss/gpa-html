@@ -3,13 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>حاسبة المعدل السنوي | احسب معدلك الدراسي مجاناً - عمان</title>
-<meta name="description" content="احسب معدلك السنوي والتراكمي مجاناً لطلاب الابتدائي والإعدادي والثانوي والجامعي، مع تقرير قابل للطباعة وحاسبة الدرجة المطلوبة لتحقيق هدفك.">
-<meta name="keywords" content="حاسبة المعدل, حساب المعدل السنوي, حاسبة المعدل التراكمي, حساب النسبة المئوية, حاسبة الدرجات, معدل الطالب">
-<meta property="og:title" content="حاسبة المعدل السنوي - احسب معدلك مجاناً">
-<meta property="og:description" content="احسب معدلك الدراسي بسهولة واطبع تقريرك.">
-<meta property="og:type" content="website">
-<meta name="google-site-verification" content="kmRyzc_Hf2Gmx3rlc6aMAH9VxnGQkmX8jqnqDXQ2yxQ" />
+<title>حاسبة المعدل السنوي</title>
+<meta name="description" content="حاسبة المعدل السنوي المجانية للطلاب: احسب معدلك للابتدائي والإعدادي والثانوي والجامعي واطبع تقريرك.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎓%3C/text%3E%3C/svg%3E">
 <style>
 body{font-family:Arial,sans-serif;background:#0e1117;color:#fafafa;margin:0;padding:20px}
@@ -37,7 +32,7 @@ small{color:#999}
 <body>
 <div class="box">
   <h1>🎓 حاسبة المعدل السنوي</h1>
-  <p>احسب معدلك السنوي والتراكمي بسهولة لطلاب الابتدائي والإعدادي والثانوي والجامعي. أدخل درجات موادك وشوف معدلك وتقديرك فوراً، واطبع تقريرك أو احفظه PDF.</p>
+  <p>أدخل درجاتك في المواد الدراسية وشوف معدلك النهائي فوراً!</p>
   <div class="noprint">
     <a id="wa" class="btn green" target="_blank">📤 شارك عبر واتساب</a>
     <button class="gray" id="cp">🔗 انسخ الرابط</button>
@@ -168,8 +163,8 @@ function calculate() {
 }
 
 function goal() {
-  const cur = parseFloat($("gCur").value) \vert{}\vert{} 0, done = parseInt($("gDone").value) || 0;
-  const rem = parseInt($("gRem").value) \vert{}\vert{} 0, tgt = parseFloat($("gTgt").value) || 0;
+  const cur = parseFloat($("gCur").value) || 0, done = parseInt($("gDone").value) || 0;
+  const rem = parseInt($("gRem").value) || 0, tgt = parseFloat($("gTgt").value) || 0;
   if (rem < 1) { alert("لازم يكون فيه مادة باقية على الأقل"); return; }
   const need = (tgt * (done + rem) - cur * done) / rem;
   $("gOut").textContent = need > 100
