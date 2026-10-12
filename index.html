@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>حاسبة المعدل السنوي</title>
 <meta name="description" content="حاسبة المعدل السنوي المجانية للطلاب: احسب معدلك للابتدائي والإعدادي والثانوي والجامعي واطبع تقريرك.">
+<meta name="keywords" content="حاسبة المعدل, حساب المعدل السنوي, حاسبة المعدل التراكمي, حساب النسبة المئوية, حاسبة الدرجات, معدل الطالب">
+<meta property="og:title" content="حاسبة المعدل السنوي - احسب معدلك مجاناً">
+<meta property="og:description" content="احسب معدلك الدراسي بسهولة واطبع تقريرك.">
+<meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎓%3C/text%3E%3C/svg%3E">
 <style>
 body{font-family:Arial,sans-serif;background:#0e1117;color:#fafafa;margin:0;padding:20px}
@@ -163,8 +167,8 @@ function calculate() {
 }
 
 function goal() {
-  const cur = parseFloat($("gCur").value) || 0, done = parseInt($("gDone").value) || 0;
-  const rem = parseInt($("gRem").value) || 0, tgt = parseFloat($("gTgt").value) || 0;
+  const cur = parseFloat($("gCur").value) \vert{}\vert{} 0, done = parseInt($("gDone").value) || 0;
+  const rem = parseInt($("gRem").value) \vert{}\vert{} 0, tgt = parseFloat($("gTgt").value) || 0;
   if (rem < 1) { alert("لازم يكون فيه مادة باقية على الأقل"); return; }
   const need = (tgt * (done + rem) - cur * done) / rem;
   $("gOut").textContent = need > 100
