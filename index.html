@@ -5,56 +5,98 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>حاسبة المعدل السنوي</title>
 <meta name="description" content="حاسبة المعدل السنوي المجانية للطلاب: احسب معدلك للابتدائي والإعدادي والثانوي والجامعي واطبع تقريرك.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎓%3C/text%3E%3C/svg%3E">
 <style>
-body{font-family:Arial,sans-serif;background:#0e1117;color:#fafafa;margin:0;padding:20px;}
-.box{max-width:700px;margin:auto;}
-input,select{background:#262730;color:#fff;border:1px solid #444;border-radius:8px;padding:8px;font-size:16px;}
-label{display:block;margin:12px 0 4px;}
-.row{display:flex;gap:8px;margin:8px 0;}
-.row input{flex:1;min-width:0;}
-.row input.name{flex:2;}
-button{background:#00C2A8;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:16px;cursor:pointer;margin-top:12px;}
-#result{display:none;margin-top:20px;padding:16px;border:1px solid #00C2A8;border-radius:12px;}
-.big{font-size:28px;color:#00C2A8;margin:4px 0;}
-table{width:100%;border-collapse:collapse;margin:10px 0;}
-td,th{border:1px solid #444;padding:6px;}
-small{color:#999;}
-@media print{.noprint{display:none;} body{background:#fff;color:#000;} #result{border:none;}}
+body{font-family:Arial,sans-serif;background:#0e1117;color:#fafafa;margin:0;padding:20px}
+.box{max-width:700px;margin:auto}
+input,select{background:#262730;color:#fff;border:1px solid #444;border-radius:8px;padding:8px;font-size:16px;box-sizing:border-box}
+label{display:block;margin:12px 0 4px}
+.row{display:flex;gap:8px;margin:8px 0}
+.row input{flex:1;min-width:0}
+.row input.name{flex:2}
+button,.btn{background:#00C2A8;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:16px;cursor:pointer;margin-top:12px;text-decoration:none;display:inline-block}
+.gray{background:#444}.green{background:#25D366}
+#result{display:none;margin-top:20px;padding:16px;border:1px solid #00C2A8;border-radius:12px}
+.big{font-size:28px;color:#00C2A8;margin:4px 0}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+td,th{border:1px solid #444;padding:6px}
+details{border:1px solid #444;border-radius:8px;padding:10px;margin-top:14px}
+summary{cursor:pointer;font-weight:bold}
+small{color:#999}
+.bar{background:#00C2A8;color:#000;padding:4px 8px;border-radius:4px;margin:4px 0;white-space:nowrap}
+.chk{display:inline-block;margin:4px 0 4px 10px}
+.chk input{width:auto}
+@media print{.noprint{display:none}body{background:#fff;color:#000}#result{border:none}}
 </style>
 </head>
 <body>
 <div class="box">
   <h1>🎓 حاسبة المعدل السنوي</h1>
+  <p>أدخل درجاتك في المواد الدراسية وشوف معدلك النهائي فوراً!</p>
   <div class="noprint">
-    <label>اسم الطالب</label>
-    <input id="student" type="text">
+    <a id="wa" class="btn green" target="_blank">📤 شارك عبر واتساب</a>
+    <button class="gray" id="cp">🔗 انسخ الرابط</button>
+    <label>اسم الطالب</label><input id="student">
     <label>المرحلة الدراسية</label>
-    <select id="stage">
-      <option>ابتدائي</option><option>إعدادي</option><option>ثانوي</option><option>جامعي</option>
-    </select>
-    <label>عدد المواد</label>
-    <input id="count" type="number" min="1" max="30" value="5">
+    <select id="stage"><option>ابتدائي</option><option>إعدادي</option><option>ثانوي</option><option>جامعي</option></select>
+    <p><small id="note"></small></p>
+    <details id="quick">
+      <summary>📚 اختر مواد شائعة لتعبئتها تلقائياً (اختياري)</summary>
+      <p><small>قائمة شائعة للمساعدة السريعة، مو قائمة رسمية من الوزارة — تقدر تعدلها بعدين.</small></p>
+      <div id="chks"></div>
+      <button onclick="fillQuick()">➕ املأ المواد المختارة</button>
+    </details>
+    <label>عدد المواد</label><input id="count" type="number" min="1" max="30" value="5">
     <div id="subjects"></div>
     <button onclick="calculate()">احسب المعدل ✅</button>
   </div>
   <div id="result"></div>
+
+  <details class="noprint">
+    <summary>🎯 حاسبة الدرجة المطلوبة لتحقيق هدفك</summary>
+    <label>معدلك الحالي (%)</label><input id="gCur" type="number" min="0" max="100" value="0">
+    <label>كم مادة دخلتها لين الحين؟</label><input id="gDone" type="number" min="0" max="30" value="0">
+    <label>كم مادة باقية عليك؟</label><input id="gRem" type="number" min="1" max="30" value="1">
+    <label>المعدل اللي تبيه (%)</label><input id="gTgt" type="number" min="0" max="100" value="90">
+    <button onclick="goal()">احسب المطلوب 🎯</button>
+    <p id="gOut"></p>
+  </details>
+
+  <details class="noprint">
+    <summary>📊 قارن بين فصولك الدراسية</summary>
+    <p><small>الفصول تنحفظ في متصفحك على هذا الجهاز.</small></p>
+    <div class="row"><input class="name" id="sName" placeholder="اسم الفصل"><input id="sAvg" type="number" min="0" max="100" placeholder="المعدل %"></div>
+    <button onclick="addSem()">➕ أضف الفصل</button>
+    <div id="sList"></div>
+  </details>
+
   <p><small>فالك النجاح 🌟 — من: أبو محمد</small></p>
 </div>
 
 <script>
+const $ = id => document.getElementById(id);
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+const isUni = () => $("stage").value === "جامعي";
 const msgs = {
   A: ["ما شاء الله! مستوى رهيب 🌟", "أداء ممتاز، فخورين فيك 🏆"],
   B: ["شغل جميل، خطوة وتوصل للممتاز 👍", "كمّل بنفس الجهد 💫"],
   C: ["مستوى مقبول، شوية جهد وتتحسن 📘", "ركّز على المواد الصعبة 💡"],
   D: ["الفصل الجاي فرصتك 💪", "غيّر طريقة مذاكرتك وشوف الفرق 📚"]
 };
-const pick = a => a[Math.floor(Math.random() * a.length)];
-const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
-const isUni = () => document.getElementById("stage").value === "جامعي";
+const presets = {
+  "ابتدائي": ["اللغة العربية","اللغة الإنجليزية","الرياضيات","العلوم","التربية الإسلامية","الهوية والمواطنة","تقنية المعلومات","التربية البدنية والصحية","الفنون البصرية","الفنون الموسيقية"],
+  "إعدادي": ["اللغة العربية","اللغة الإنجليزية","الرياضيات","العلوم","التربية الإسلامية","الدراسات الاجتماعية","تقنية المعلومات","التربية البدنية","الفنون"],
+  "ثانوي": ["اللغة العربية","اللغة الإنجليزية","الرياضيات","الفيزياء","الكيمياء","الأحياء","التربية الإسلامية","الدراسات الاجتماعية","تقنية المعلومات"]
+};
+const notes = {
+  "ثانوي": "⚠️ للثانوية العامة والدبلوم: راجع البوابة التعليمية الرسمية لحساب النسبة الدقيقة المعتمدة.",
+  "جامعي": "📚 للجامعيين: أدخل الساعات المعتمدة لكل مادة ليُحسب المعدل المرجّح."
+};
 
 function buildRows() {
-  const n = Math.min(30, Math.max(1, parseInt(document.getElementById("count").value) || 1));
-  const box = document.getElementById("subjects");
+  const n = Math.min(30, Math.max(1, parseInt($("count").value) || 1));
+  const box = $("subjects");
   const old = [...box.querySelectorAll(".row")].map(r => [...r.querySelectorAll("input")].map(i => i.value));
   let html = "";
   for (let i = 0; i < n; i++) {
@@ -66,6 +108,22 @@ function buildRows() {
     </div>`;
   }
   box.innerHTML = html;
+}
+
+function onStage() {
+  const s = $("stage").value;
+  $("note").textContent = notes[s] || "";
+  $("quick").style.display = isUni() ? "none" : "block";
+  $("chks").innerHTML = (presets[s] || []).map(n => `<label class="chk"><input type="checkbox" value="${n}"> ${n}</label>`).join("");
+  buildRows();
+}
+
+function fillQuick() {
+  const picked = [...document.querySelectorAll("#chks input:checked")].map(c => c.value);
+  if (!picked.length) { alert("اختر مادة وحدة على الأقل أول!"); return; }
+  $("count").value = picked.length;
+  buildRows();
+  document.querySelectorAll("#subjects .name").forEach((el, i) => el.value = picked[i] || "");
 }
 
 function calculate() {
@@ -89,13 +147,12 @@ function calculate() {
   else if (avg >= 80) { g = "B"; t = "جيد جداً (B) 👍"; }
   else if (avg >= 70) { g = "C"; t = "جيد (C) 📘"; }
   else { g = "D"; t = "تحتاج مزيداً من الاجتهاد 💪"; }
-
-  const studentName = esc(document.getElementById("student").value) || "—";
-  const res = document.getElementById("result");
+  const who = esc($("student").value) || "—";
+  const res = $("result");
   res.style.display = "block";
   res.innerHTML = `
     <h2>📊 النتيجة</h2>
-    <p><b>الطالب:</b> ${studentName} | <b>المرحلة:</b> ${document.getElementById("stage").value} | ${new Date().toISOString().slice(0, 10)}</p>
+    <p><b>الطالب:</b> ${who} | <b>المرحلة:</b> ${$("stage").value} | ${new Date().toISOString().slice(0, 10)}</p>
     <table><tr><th>المادة</th><th>الدرجة</th>${uni ? "<th>الساعات</th>" : ""}</tr>${rowsHtml}</table>
     <p>${uni ? "المعدل المرجّح (من 100)" : "المعدل النهائي"}</p>
     <p class="big">${avg.toFixed(2)}%</p>
@@ -105,9 +162,43 @@ function calculate() {
     <button class="noprint" onclick="window.print()">🖨️ اطبع / احفظ كـ PDF</button>`;
 }
 
-document.getElementById("count").oninput = buildRows;
-document.getElementById("stage").onchange = buildRows;
-buildRows();
+function goal() {
+  const cur = parseFloat($("gCur").value) || 0, done = parseInt($("gDone").value) || 0;
+  const rem = parseInt($("gRem").value) || 0, tgt = parseFloat($("gTgt").value) || 0;
+  if (rem < 1) { alert("لازم يكون فيه مادة باقية على الأقل"); return; }
+  const need = (tgt * (done + rem) - cur * done) / rem;
+  $("gOut").textContent = need > 100
+    ? `⚠️ هدفك غير ممكن رياضياً — تحتاج ${need.toFixed(1)}% وهذا أعلى من 100%.`
+    : need < 0 ? "🎉 مبروك! هدفك محقق حتى لو جبت صفر بالباقي!"
+    : `✅ تحتاج تجيب بالمتوسط ${need.toFixed(1)}% بالمواد الباقية.`;
+}
+
+let sems = [];
+try { sems = JSON.parse(localStorage.getItem("sems")) || []; } catch (e) {}
+function saveSems() { try { localStorage.setItem("sems", JSON.stringify(sems)); } catch (e) {} }
+function drawSems() {
+  $("sList").innerHTML = sems.map((s, i) =>
+    `<div class="bar" style="width:${Math.max(s[1], 12)}%">${esc(s[0])}: ${s[1]}% <a href="#" onclick="delSem(${i});return false">🗑️</a></div>`).join("")
+    + (sems.length ? `<button class="gray" onclick="sems=[];saveSems();drawSems()">🧹 امسح الكل</button>` : "");
+}
+function addSem() {
+  const n = $("sName").value.trim(), a = parseFloat($("sAvg").value);
+  if (!n || isNaN(a) || a < 0 || a > 100) { alert("اكتب اسم الفصل ومعدل بين 0 و 100"); return; }
+  sems.push([n, a]); saveSems(); drawSems();
+  $("sName").value = ""; $("sAvg").value = "";
+}
+function delSem(i) { sems.splice(i, 1); saveSems(); drawSems(); }
+
+$("wa").href = "https://wa.me/?text=" + encodeURIComponent("جرب حاسبة المعدل السنوي: " + location.href);
+$("cp").onclick = () => {
+  navigator.clipboard.writeText(location.href);
+  $("cp").textContent = "✅ تم النسخ!";
+  setTimeout(() => $("cp").textContent = "🔗 انسخ الرابط", 2000);
+};
+$("count").oninput = buildRows;
+$("stage").onchange = onStage;
+onStage();
+drawSems();
 </script>
 </body>
 </html>
