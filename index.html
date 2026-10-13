@@ -1,6 +1,3 @@
-انسخ الكود كاملًا من بداية `<!doctype html>` إلى نهاية `</html>`، والصقه بدل محتوى `index.html` في GitHub:
-
-```html
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
@@ -75,10 +72,11 @@
       border-radius: 13px;
       background: var(--green);
       color: white;
-      font-size: 19px;
     }
+    .brand-mark svg { width: 24px; height: 24px; }
     .top-actions { display: flex; gap: 9px; }
-    .theme-toggle { width: 42px; padding: 0; font-size: 19px; }
+    .theme-toggle { width: auto; padding-inline: 12px; gap: 7px; white-space: nowrap; }
+    .theme-icon { font-size: 18px; line-height: 1; }
     .hero { padding: 28px 0 24px; }
     .eyebrow {
       display: inline-flex;
@@ -236,7 +234,8 @@
     }
     @media (max-width: 560px) {
       .page { width: min(100% - 22px, 520px); }
-      .topbar { padding-block: 13px; }
+      .topbar { flex-wrap: wrap; padding-block: 13px; }
+      .top-actions { width: 100%; }
       .top-actions .button { min-height: 37px; padding: 6px 9px; }
       .hero { padding: 19px 0 18px; }
       .card { border-radius: 16px; }
@@ -280,11 +279,20 @@
   <div class="page">
     <header class="topbar">
       <div class="brand">
-        <span class="brand-mark" aria-hidden="true">م</span>
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m2.5 8 9.5 4.8L21.5 8 12 3.2 2.5 8Z"/>
+            <path d="M6.5 10v4.5c3.2 2 7.8 2 11 0V10"/>
+            <path d="M21.5 8v5"/>
+          </svg>
+        </span>
         <span>حاسبة المعدل</span>
       </div>
       <div class="top-actions">
-        <button class="button theme-toggle" id="themeToggle" type="button" aria-label="التبديل إلى المظهر الداكن" title="التبديل إلى المظهر الداكن">☾</button>
+        <button class="button theme-toggle" id="themeToggle" type="button" aria-label="التبديل إلى المظهر الداكن" title="التبديل إلى المظهر الداكن">
+          <span class="theme-icon" id="themeIcon" aria-hidden="true">☾</span>
+          <span class="theme-label" id="themeLabel">الوضع الليلي</span>
+        </button>
         <button class="button" id="shareButton" type="button">مشاركة النتيجة</button>
         <button class="button" id="printButton" type="button">طباعة</button>
       </div>
@@ -522,7 +530,9 @@
         const dark = theme === "dark";
         document.documentElement.dataset.theme = dark ? "dark" : "light";
         const toggle = document.getElementById("themeToggle");
-        toggle.textContent = dark ? "☀" : "☾";
+        const nextThemeLabel = dark ? "الوضع الفاتح" : "الوضع الليلي";
+        document.getElementById("themeIcon").textContent = dark ? "☀" : "☾";
+        document.getElementById("themeLabel").textContent = nextThemeLabel;
         toggle.setAttribute("aria-label", dark ? "التبديل إلى المظهر الفاتح" : "التبديل إلى المظهر الداكن");
         toggle.title = dark ? "التبديل إلى المظهر الفاتح" : "التبديل إلى المظهر الداكن";
         document.querySelector('meta[name="theme-color"]').content = dark ? "#101711" : "#f5f7f2";
@@ -741,4 +751,3 @@
   </script>
 </body>
 </html>
-```
