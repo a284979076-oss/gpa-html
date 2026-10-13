@@ -1,3 +1,6 @@
+أضفت الفكرتين: تعرض الحاسبة المواد التي قد يؤثر تحسينها أكثر في المعدل، ويمكنك إدخال المواد القادمة وتوقعاتك للحصول على هدف مقترح لكل مادة. اختبرت صياغة الكود وحساب توزيع الأهداف. انسخ هذا كاملًا إلى `index.html` في GitHub:
+
+```html
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
@@ -193,12 +196,33 @@
     .mini-stat span { display: block; color: var(--muted); font-size: 11px; }
     .mini-stat strong { display: block; margin-top: 2px; font-size: 17px; }
     .callout { margin: 0 20px 18px; padding: 10px 12px; border-radius: 11px; background: #f6f8f5; color: var(--muted); font-size: 12px; }
+    .impact-card { padding: 19px; }
+    .impact-card h2 { margin: 0; font-size: 17px; }
+    .impact-card > p { margin: 5px 0 13px; color: var(--muted); font-size: 12px; }
+    .impact-list { display: grid; gap: 8px; }
+    .impact-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 11px; }
+    .impact-row strong { font-size: 13px; }
+    .impact-row small { display: block; color: var(--muted); font-size: 11px; }
+    .impact-value { color: var(--green-dark); font-size: 12px; font-weight: 800; white-space: nowrap; }
     .goal-card { padding: 20px; }
     .goal-card h2 { margin: 0; font-size: 17px; }
     .goal-card > p { margin: 5px 0 15px; color: var(--muted); font-size: 12px; }
     .goal-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .goal-result { min-height: 58px; margin-top: 13px; padding: 11px 12px; border-radius: 12px; background: var(--amber); color: #704c0e; font-size: 13px; }
     .goal-result strong { display: block; font-size: 19px; }
+    .plan-details { margin-top: 15px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; }
+    .plan-details summary { color: var(--green-dark); font-size: 13px; font-weight: 750; cursor: pointer; }
+    .plan-intro { margin: 8px 0 12px; color: var(--muted); font-size: 12px; }
+    .plan-head, .plan-row { display: grid; grid-template-columns: minmax(100px, 1.35fr) minmax(85px, .9fr) minmax(66px, .7fr) 34px; align-items: center; gap: 7px; }
+    .plan-head { color: var(--muted); font-size: 11px; font-weight: 700; }
+    .plan-row { margin-top: 7px; }
+    .plan-row input { height: 38px; padding-inline: 8px; font-size: 12px; }
+    .plan-row .remove-btn { width: 32px; height: 34px; }
+    .plan-actions { margin-top: 10px; }
+    .plan-output { display: grid; gap: 8px; margin-top: 12px; }
+    .plan-output-title { font-size: 12px; }
+    .plan-output-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; border-radius: 9px; background: var(--mint); font-size: 12px; }
+    .plan-target { color: var(--green-dark); font-weight: 800; text-align: left; white-space: nowrap; }
     .history-card { padding: 20px; }
     .history-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
     .history-header h2 { margin: 0; font-size: 17px; }
@@ -230,6 +254,7 @@
     @media (max-width: 780px) {
       .layout { grid-template-columns: 1fr; }
       .side-stack { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+      .impact-card { grid-column: 1 / -1; }
       .history-card { grid-column: 1 / -1; }
     }
     @media (max-width: 560px) {
@@ -246,6 +271,7 @@
       .subject-row input { padding-inline: 8px; font-size: 13px; }
       .remove-btn { width: 33px; height: 36px; }
       .side-stack { grid-template-columns: 1fr; }
+      .impact-card { grid-column: auto; }
       .history-card { grid-column: auto; }
       .result-number { font-size: 45px; }
       .card-head { margin-bottom: 14px; }
@@ -388,6 +414,14 @@
             <div class="callout" id="validationMessage" role="status">تُحتسب المواد التي أدخلت درجتها فقط.</div>
           </section>
 
+          <section class="card impact-card" aria-labelledby="impactHeading">
+            <h2 id="impactHeading">المادة الأكثر تأثيرًا</h2>
+            <p>تعرّف على المواد التي يمكن أن ترفع معدلك أكثر إذا حسّنت درجتها.</p>
+            <div class="impact-list" id="impactList" aria-live="polite">
+              <div class="history-empty">أدخل درجات المواد لمعرفة الأكثر تأثيرًا.</div>
+            </div>
+          </section>
+
           <section class="card goal-card" aria-labelledby="goalHeading">
             <h2 id="goalHeading">احسب الدرجة المطلوبة</h2>
             <p>اكتشف متوسط الدرجة المطلوب في المواد المتبقية للوصول إلى هدفك.</p>
@@ -402,7 +436,22 @@
               </div>
             </div>
             <div class="goal-result" id="goalResult" aria-live="polite">أدخل درجاتك وهدفك لحساب المطلوب.</div>
-            <p class="hint" style="margin:10px 0 0">يفترض الحساب أن وزن كل مادة متبقية يساوي 1.</p>
+            <p class="hint" style="margin:10px 0 0">عند استخدام عدد المواد فقط، يفترض الحساب أن وزن كل مادة متبقية يساوي 1.</p>
+            <details class="plan-details">
+              <summary>أنشئ خطة شخصية للمواد المتبقية</summary>
+              <p class="plan-intro">إذا أضفت مواد هنا فستُستخدم بدل العدد أعلاه. أدخل توقعك ووزن كل مادة؛ توزّع الخطة الزيادة المطلوبة بالتساوي فوق توقعاتك مع مراعاة الأوزان وسقف الدرجة.</p>
+              <div class="plan-head" aria-hidden="true">
+                <span>المادة</span><span>توقعي</span><span>الوزن</span><span></span>
+              </div>
+              <div id="plannedSubjects"></div>
+              <div class="plan-actions">
+                <button class="button button-small" id="addPlanSubject" type="button">＋ إضافة مادة للخطة</button>
+              </div>
+              <div class="plan-output" id="planOutput" hidden>
+                <strong class="plan-output-title">الأهداف المقترحة لكل مادة</strong>
+                <div id="planOutputList"></div>
+              </div>
+            </details>
           </section>
 
           <section class="card history-card" aria-labelledby="historyHeading">
@@ -432,6 +481,7 @@
       const THEME_KEY = "gpa-html-theme-v1";
       const suggestedNames = ["اللغة العربية", "اللغة الإنجليزية", "الرياضيات", "العلوم"];
       const subjects = document.getElementById("subjects");
+      const plannedSubjects = document.getElementById("plannedSubjects");
       const maxMarkInput = document.getElementById("maxMark");
       let history = loadJson(HISTORY_KEY, []);
 
@@ -486,6 +536,48 @@
         return row;
       }
 
+      function makePlanRow(name = "", expected = "", weight = 1) {
+        const row = document.createElement("div");
+        row.className = "plan-row";
+
+        const nameInput = document.createElement("input");
+        nameInput.type = "text";
+        nameInput.className = "plan-name";
+        nameInput.maxLength = 60;
+        nameInput.placeholder = "اسم المادة";
+        nameInput.setAttribute("aria-label", "اسم المادة في الخطة");
+        nameInput.value = name;
+
+        const expectedInput = document.createElement("input");
+        expectedInput.type = "number";
+        expectedInput.className = "plan-expected";
+        expectedInput.min = "0";
+        expectedInput.step = "any";
+        expectedInput.inputMode = "decimal";
+        expectedInput.placeholder = "توقعك";
+        expectedInput.setAttribute("aria-label", "الدرجة المتوقعة");
+        expectedInput.value = expected;
+
+        const weightInput = document.createElement("input");
+        weightInput.type = "number";
+        weightInput.className = "plan-weight";
+        weightInput.min = "0.01";
+        weightInput.step = "any";
+        weightInput.inputMode = "decimal";
+        weightInput.value = weight || 1;
+        weightInput.setAttribute("aria-label", "وزن المادة في الخطة");
+
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "remove-btn";
+        remove.setAttribute("aria-label", "حذف المادة من الخطة");
+        remove.title = "حذف المادة من الخطة";
+        remove.textContent = "×";
+
+        row.append(nameInput, expectedInput, weightInput, remove);
+        return row;
+      }
+
       function getDraft() {
         return {
           name: document.getElementById("studentName").value,
@@ -498,6 +590,11 @@
             name: row.querySelector(".subject-name").value,
             grade: row.querySelector(".subject-grade").value,
             weight: row.querySelector(".subject-weight").value
+          })),
+          plannedSubjects: Array.from(plannedSubjects.querySelectorAll(".plan-row")).map((row) => ({
+            name: row.querySelector(".plan-name").value,
+            expected: row.querySelector(".plan-expected").value,
+            weight: row.querySelector(".plan-weight").value
           }))
         };
       }
@@ -513,6 +610,8 @@
           document.getElementById("remainingCount").value = draft.remainingCount ?? "3";
           const restored = Array.isArray(draft.subjects) ? draft.subjects : [];
           restored.forEach((item) => subjects.append(makeRow(item.name || "", item.grade || "", item.weight || 1)));
+          const restoredPlan = Array.isArray(draft.plannedSubjects) ? draft.plannedSubjects : [];
+          restoredPlan.forEach((item) => plannedSubjects.append(makePlanRow(item.name || "", item.expected || "", item.weight || 1)));
         }
         if (!subjects.children.length) suggestedNames.forEach((name) => subjects.append(makeRow(name)));
       }
@@ -558,7 +657,11 @@
             invalid = true;
             return;
           }
-          entered.push({ grade, weight });
+          entered.push({
+            name: row.querySelector(".subject-name").value.trim() || "مادة بدون اسم",
+            grade,
+            weight
+          });
         });
 
         const totalWeight = entered.reduce((sum, item) => sum + item.weight, 0);
@@ -566,6 +669,134 @@
         const averageMark = totalWeight ? weightedMarks / totalWeight : null;
         const percentage = averageMark !== null && maxMark > 0 ? (averageMark / maxMark) * 100 : null;
         return { maxMark, entered, totalWeight, weightedMarks, averageMark, percentage, invalid };
+      }
+
+      function getPlannedCourses(maxMark) {
+        const courses = [];
+        let invalid = false;
+
+        Array.from(plannedSubjects.querySelectorAll(".plan-row")).forEach((row, index) => {
+          const name = row.querySelector(".plan-name").value.trim();
+          const expectedText = row.querySelector(".plan-expected").value.trim();
+          if (!name && !expectedText) return;
+
+          const expected = Number(expectedText);
+          const weight = Number(row.querySelector(".plan-weight").value);
+          if (expectedText === "" || !Number.isFinite(expected) || expected < 0 || expected > maxMark || !Number.isFinite(weight) || weight <= 0) {
+            invalid = true;
+            return;
+          }
+          courses.push({ name: name || `المادة ${index + 1}`, expected, weight });
+        });
+
+        return { courses, invalid };
+      }
+
+      function distributeTargets(courses, requiredWeightedMarks, maxMark) {
+        let low = -maxMark;
+        let high = maxMark;
+
+        for (let iteration = 0; iteration < 80; iteration += 1) {
+          const increase = (low + high) / 2;
+          const plannedTotal = courses.reduce(
+            (sum, course) => sum + Math.min(maxMark, Math.max(0, course.expected + increase)) * course.weight,
+            0
+          );
+          if (plannedTotal < requiredWeightedMarks) low = increase;
+          else high = increase;
+        }
+
+        const increase = (low + high) / 2;
+        return courses.map((course) => ({
+          ...course,
+          target: Math.min(maxMark, Math.max(0, course.expected + increase))
+        }));
+      }
+
+      function renderImpact(calculation) {
+        const list = document.getElementById("impactList");
+        list.replaceChildren();
+
+        if (!calculation.entered.length || calculation.invalid || calculation.maxMark <= 0) {
+          const empty = document.createElement("div");
+          empty.className = "history-empty";
+          empty.textContent = calculation.invalid
+            ? "صحّح الدرجات والأوزان أولًا لعرض التأثير."
+            : "أدخل درجات المواد لمعرفة الأكثر تأثيرًا.";
+          list.append(empty);
+          return;
+        }
+
+        const mostImpactful = calculation.entered
+          .map((course) => {
+            const increase = Math.min(5, calculation.maxMark - course.grade);
+            const impact = calculation.totalWeight
+              ? (increase * course.weight / calculation.totalWeight / calculation.maxMark) * 100
+              : 0;
+            return { ...course, increase, impact };
+          })
+          .filter((course) => course.increase > 0)
+          .sort((a, b) => b.impact - a.impact)
+          .slice(0, 3);
+
+        if (!mostImpactful.length) {
+          const empty = document.createElement("div");
+          empty.className = "history-empty";
+          empty.textContent = "درجات المواد المحتسبة وصلت إلى الدرجة القصوى.";
+          list.append(empty);
+          return;
+        }
+
+        mostImpactful.forEach((course, index) => {
+          const row = document.createElement("div");
+          row.className = "impact-row";
+
+          const details = document.createElement("div");
+          const name = document.createElement("strong");
+          name.textContent = `${index + 1}. ${course.name}`;
+          const explanation = document.createElement("small");
+          explanation.textContent = `رفعها ${formatNumber(course.increase)} درجات قد يرفع المعدل بهذا المقدار`;
+          details.append(name, explanation);
+
+          const value = document.createElement("span");
+          value.className = "impact-value";
+          value.textContent = `+${formatNumber(course.impact)} نقطة مئوية`;
+          row.append(details, value);
+          list.append(row);
+        });
+      }
+
+      function showGoalResult(title, description = "") {
+        const result = document.getElementById("goalResult");
+        result.replaceChildren();
+        if (!description) {
+          result.textContent = title;
+          return;
+        }
+        const heading = document.createElement("strong");
+        heading.textContent = title;
+        const text = document.createElement("span");
+        text.textContent = description;
+        result.append(heading, text);
+      }
+
+      function renderPlanOutput(courses) {
+        const output = document.getElementById("planOutput");
+        const list = document.getElementById("planOutputList");
+        list.replaceChildren();
+
+        courses.forEach((course) => {
+          const row = document.createElement("div");
+          row.className = "plan-output-row";
+          const name = document.createElement("span");
+          name.textContent = course.name;
+          const target = document.createElement("span");
+          target.className = "plan-target";
+          target.textContent = `توقّعك ${formatNumber(course.expected)} ← الهدف ${formatNumber(course.target)}`;
+          row.append(name, target);
+          list.append(row);
+        });
+        output.hidden = courses.length === 0;
       }
 
       function update() {
@@ -599,24 +830,59 @@
         else if (invalid) message.textContent = `تحقّق من الدرجات والأوزان: الدرجة بين 0 و${formatNumber(maxMark)}، والوزن أكبر من صفر.`;
         else message.textContent = "تُحتسب المواد التي أدخلت درجتها فقط. يُحسب المعدل وفق أوزان المواد.";
 
+        renderImpact(calculation);
+
         const remaining = Number(document.getElementById("remainingCount").value);
         const targetPct = Number(document.getElementById("goalPercent").value);
         const goalResult = document.getElementById("goalResult");
-        if (percentage === null || invalid || !validMax || !Number.isFinite(targetPct) || targetPct < 0 || targetPct > 100 || !Number.isFinite(remaining) || remaining < 0) {
-          goalResult.textContent = "أدخل درجات صحيحة وهدفًا بين 0 و100 لحساب المطلوب.";
-        } else if (remaining === 0) {
-          goalResult.textContent = percentage >= targetPct
-            ? "حققت المعدل المستهدف بناءً على الدرجات الحالية."
-            : "لا توجد مواد متبقية لإكمال الحساب. أضف عدد المواد المتبقية.";
+        const planOutput = document.getElementById("planOutput");
+        const personalPlan = getPlannedCourses(maxMark);
+        const hasPersonalPlan = personalPlan.courses.length > 0;
+        planOutput.hidden = true;
+
+        if (!validMax || invalid || !Number.isFinite(targetPct) || targetPct < 0 || targetPct > 100) {
+          showGoalResult("أدخل درجات صحيحة وهدفًا بين 0 و100 لحساب المطلوب.");
+        } else if (personalPlan.invalid) {
+          showGoalResult("أكمل بيانات الخطة", `أدخل توقعًا بين 0 و${formatNumber(maxMark)} ووزنًا أكبر من صفر لكل مادة بدأت بإضافتها.`);
+        } else if (!entered.length && !hasPersonalPlan) {
+          showGoalResult("أدخل درجاتك أو أضف موادك المتبقية بالخطة.");
+        } else if (!hasPersonalPlan && (!Number.isInteger(remaining) || remaining < 0)) {
+          showGoalResult("أدخل عددًا صحيحًا للمواد المتبقية.");
         } else {
-          const targetMark = (targetPct / 100) * maxMark;
-          const needed = (targetMark * (totalWeight + remaining) - calculation.weightedMarks) / remaining;
-          if (needed <= 0) {
-            goalResult.innerHTML = "<strong>وصلت إلى هدفك</strong>معدلك الحالي يحقق الهدف بالفعل.";
-          } else if (needed > maxMark) {
-            goalResult.innerHTML = "<strong>الهدف غير ممكن حاليًا</strong>حتى الدرجة الكاملة في المواد المتبقية لن تكفي.";
+          const futureCourses = hasPersonalPlan
+            ? personalPlan.courses
+            : Array.from({ length: Math.min(remaining, 500) }, (_, index) => ({
+                name: `المادة ${index + 1}`,
+                expected: 0,
+                weight: 1
+              }));
+          const futureWeight = futureCourses.reduce((sum, course) => sum + course.weight, 0);
+
+          if (futureWeight === 0) {
+            showGoalResult(percentage !== null && percentage >= targetPct
+              ? "حققت المعدل المستهدف بناءً على الدرجات الحالية."
+              : "لا توجد مواد متبقية لإكمال الحساب. أضف عدد المواد المتبقية.");
           } else {
-            goalResult.innerHTML = `<strong>${formatNumber(needed)} من ${formatNumber(maxMark)}</strong>متوسط الدرجة المطلوب في كل مادة متبقية.`;
+            const targetMark = (targetPct / 100) * maxMark;
+            const requiredWeightedMarks = targetMark * (totalWeight + futureWeight) - calculation.weightedMarks;
+            const neededAverage = requiredWeightedMarks / futureWeight;
+
+            if (neededAverage <= 0) {
+              showGoalResult("وصلت إلى هدفك", "معدلك الحالي يحقق الهدف بالفعل.");
+            } else if (neededAverage > maxMark) {
+              showGoalResult("الهدف غير ممكن حاليًا", "حتى الدرجة الكاملة في المواد المتبقية لن تكفي.");
+            } else if (hasPersonalPlan) {
+              showGoalResult(
+                `المتوسط المطلوب ${formatNumber(neededAverage)} من ${formatNumber(maxMark)}`,
+                "هذه أهداف مقترحة موزعة بحسب توقعك لكل مادة وأوزانها."
+              );
+              renderPlanOutput(distributeTargets(personalPlan.courses, requiredWeightedMarks, maxMark));
+            } else {
+              showGoalResult(
+                `${formatNumber(neededAverage)} من ${formatNumber(maxMark)}`,
+                "هذا متوسط الدرجة المطلوب في كل مادة متبقية."
+              );
+            }
           }
         }
 
@@ -682,6 +948,13 @@
         update();
       }
 
+      function addPlanSubject() {
+        const row = makePlanRow();
+        plannedSubjects.append(row);
+        row.querySelector(".plan-name").focus();
+        update();
+      }
+
       subjects.addEventListener("input", update);
       subjects.addEventListener("click", (event) => {
         const button = event.target.closest(".remove-btn");
@@ -690,9 +963,18 @@
           update();
         }
       });
+      plannedSubjects.addEventListener("input", update);
+      plannedSubjects.addEventListener("click", (event) => {
+        const button = event.target.closest(".remove-btn");
+        if (button) {
+          button.closest(".plan-row").remove();
+          update();
+        }
+      });
       document.querySelectorAll("input, select").forEach((field) => field.addEventListener("input", update));
       document.querySelectorAll("select").forEach((field) => field.addEventListener("change", update));
       document.getElementById("addSubject").addEventListener("click", () => addSubject());
+      document.getElementById("addPlanSubject").addEventListener("click", addPlanSubject);
       document.getElementById("suggestions").addEventListener("click", (event) => {
         const button = event.target.closest("[data-subject]");
         if (!button) return;
@@ -751,3 +1033,4 @@
   </script>
 </body>
 </html>
+```
