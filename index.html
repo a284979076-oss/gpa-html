@@ -1,204 +1,664 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>حاسبة المعدل السنوي</title>
-<meta name="description" content="حاسبة المعدل السنوي المجانية للطلاب: احسب معدلك للابتدائي والإعدادي والثانوي والجامعي واطبع تقريرك.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎓%3C/text%3E%3C/svg%3E">
-<style>
-body{font-family:Arial,sans-serif;background:#0e1117;color:#fafafa;margin:0;padding:20px}
-.box{max-width:700px;margin:auto}
-input,select{background:#262730;color:#fff;border:1px solid #444;border-radius:8px;padding:8px;font-size:16px;box-sizing:border-box}
-label{display:block;margin:12px 0 4px}
-.row{display:flex;gap:8px;margin:8px 0}
-.row input{flex:1;min-width:0}
-.row input.name{flex:2}
-button,.btn{background:#00C2A8;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:16px;cursor:pointer;margin-top:12px;text-decoration:none;display:inline-block}
-.gray{background:#444}.green{background:#25D366}
-#result{display:none;margin-top:20px;padding:16px;border:1px solid #00C2A8;border-radius:12px}
-.big{font-size:28px;color:#00C2A8;margin:4px 0}
-table{width:100%;border-collapse:collapse;margin:10px 0}
-td,th{border:1px solid #444;padding:6px}
-details{border:1px solid #444;border-radius:8px;padding:10px;margin-top:14px}
-summary{cursor:pointer;font-weight:bold}
-small{color:#999}
-.bar{background:#00C2A8;color:#000;padding:4px 8px;border-radius:4px;margin:4px 0;white-space:nowrap}
-.chk{display:inline-block;margin:4px 0 4px 10px}
-.chk input{width:auto}
-@media print{.noprint{display:none}body{background:#fff;color:#000}#result{border:none}}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7f2">
+  <meta name="description" content="احسب معدلك الدراسي، جرّب درجاتك، وقارن بين فصولك الدراسية.">
+  <title>حاسبة المعدل الدراسي</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17271f;
+      --muted: #66736a;
+      --green: #176b4b;
+      --green-dark: #10543a;
+      --mint: #e8f4ec;
+      --paper: #ffffff;
+      --canvas: #f5f7f2;
+      --line: #e2e8e0;
+      --amber: #fff4dd;
+      --red: #a43e36;
+      --shadow: 0 14px 40px rgba(29, 54, 38, .065);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--canvas);
+      color: var(--ink);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.65;
+    }
+
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .page { width: min(1080px, calc(100% - 32px)); margin-inline: auto; }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding-block: 20px;
+    }
+    .brand { display: flex; align-items: center; gap: 11px; font-weight: 800; }
+    .brand-mark {
+      display: grid;
+      width: 40px;
+      height: 40px;
+      place-items: center;
+      border-radius: 13px;
+      background: var(--green);
+      color: white;
+      font-size: 19px;
+    }
+    .top-actions { display: flex; gap: 9px; }
+    .hero { padding: 28px 0 24px; }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 750;
+    }
+    h1 { margin: 7px 0 8px; font-size: clamp(29px, 5vw, 43px); line-height: 1.2; letter-spacing: -.035em; }
+    .hero p { max-width: 650px; margin: 0; color: var(--muted); }
+    .layout { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(280px, .85fr); align-items: start; gap: 19px; padding-bottom: 40px; }
+    .stack { display: grid; gap: 18px; }
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+    .card-pad { padding: 22px; }
+    .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+    .card-head h2 { margin: 0; font-size: 19px; line-height: 1.35; }
+    .card-head p { margin: 5px 0 0; color: var(--muted); font-size: 13px; }
+    .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .field { display: grid; gap: 6px; }
+    .field label, .field-label { font-size: 13px; font-weight: 700; }
+    input, select {
+      width: 100%;
+      min-width: 0;
+      height: 44px;
+      padding: 8px 11px;
+      border: 1px solid #dce4db;
+      border-radius: 11px;
+      outline: none;
+      background: #fff;
+      color: var(--ink);
+      transition: border-color .16s, box-shadow .16s;
+    }
+    input:focus, select:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(23, 107, 75, .12); }
+    input::placeholder { color: #a0aaa1; }
+    .scale-row { display: grid; grid-template-columns: 1fr 145px; align-items: end; gap: 14px; margin-top: 14px; }
+    .hint { color: var(--muted); font-size: 12px; }
+    .section-rule { height: 1px; margin: 20px 0 16px; background: var(--line); }
+    .suggestions { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+    .chip {
+      padding: 6px 11px;
+      border: 1px solid #dce9df;
+      border-radius: 999px;
+      background: #f7fbf7;
+      color: #365b46;
+      font-size: 12px;
+      transition: background .16s, border-color .16s;
+    }
+    .chip:hover { border-color: #9fc8ad; background: var(--mint); }
+    .subject-head, .subject-row {
+      display: grid;
+      grid-template-columns: minmax(140px, 1.7fr) minmax(90px, .85fr) minmax(78px, .7fr) 40px;
+      align-items: center;
+      gap: 9px;
+    }
+    .subject-head { padding: 0 2px 8px; color: var(--muted); font-size: 12px; font-weight: 700; }
+    .subject-row { margin-bottom: 9px; }
+    .subject-row input { height: 42px; }
+    .remove-btn {
+      display: grid;
+      width: 38px;
+      height: 38px;
+      place-items: center;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      background: transparent;
+      color: #8b9890;
+      font-size: 20px;
+    }
+    .remove-btn:hover { border-color: #f0d4d1; background: #fff5f4; color: var(--red); }
+    .subject-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 13px; }
+    .button {
+      display: inline-flex;
+      min-height: 42px;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 9px 14px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 750;
+      transition: transform .15s, background .15s, border-color .15s;
+    }
+    .button:hover { transform: translateY(-1px); border-color: #b9ccbd; background: #fbfdfb; }
+    .button:active { transform: translateY(0); }
+    .button-primary { border-color: var(--green); background: var(--green); color: #fff; }
+    .button-primary:hover { border-color: var(--green-dark); background: var(--green-dark); }
+    .button-quiet { border-color: transparent; background: transparent; color: var(--muted); }
+    .button-small { min-height: 35px; padding: 6px 10px; font-size: 12px; }
+    .result-card { overflow: hidden; }
+    .result-top { padding: 22px; background: linear-gradient(145deg, #eaf5ed, #f6faf4); }
+    .result-top h2 { margin: 0; font-size: 16px; }
+    .result-number { margin-top: 5px; color: var(--green-dark); font-size: 52px; font-weight: 850; letter-spacing: -.055em; line-height: 1.2; }
+    .result-number small { font-size: 19px; letter-spacing: 0; }
+    .result-copy { margin-top: 6px; color: #526b5b; font-size: 13px; }
+    .progress-track { height: 8px; margin-top: 17px; overflow: hidden; border-radius: 8px; background: rgba(23, 107, 75, .13); }
+    .progress-fill { width: 0; height: 100%; border-radius: inherit; background: var(--green); transition: width .25s ease; }
+    .result-details { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 17px 20px 20px; }
+    .mini-stat { padding: 11px; border: 1px solid var(--line); border-radius: 12px; }
+    .mini-stat span { display: block; color: var(--muted); font-size: 11px; }
+    .mini-stat strong { display: block; margin-top: 2px; font-size: 17px; }
+    .callout { margin: 0 20px 18px; padding: 10px 12px; border-radius: 11px; background: #f6f8f5; color: var(--muted); font-size: 12px; }
+    .goal-card { padding: 20px; }
+    .goal-card h2 { margin: 0; font-size: 17px; }
+    .goal-card > p { margin: 5px 0 15px; color: var(--muted); font-size: 12px; }
+    .goal-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .goal-result { min-height: 58px; margin-top: 13px; padding: 11px 12px; border-radius: 12px; background: var(--amber); color: #704c0e; font-size: 13px; }
+    .goal-result strong { display: block; font-size: 19px; }
+    .history-card { padding: 20px; }
+    .history-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .history-header h2 { margin: 0; font-size: 17px; }
+    .history-header p { margin: 4px 0 13px; color: var(--muted); font-size: 12px; }
+    .history-list { display: grid; gap: 9px; }
+    .history-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 12px; }
+    .history-item strong { display: block; font-size: 13px; }
+    .history-item small { color: var(--muted); font-size: 11px; }
+    .history-score { color: var(--green); font-weight: 800; white-space: nowrap; }
+    .history-empty { padding: 17px 12px; border: 1px dashed #cfd9d0; border-radius: 12px; color: var(--muted); font-size: 12px; text-align: center; }
+    .history-compare { margin-top: 12px; padding: 11px 12px; border-radius: 11px; background: var(--mint); color: #315a40; font-size: 12px; }
+    .footer { padding: 0 0 25px; color: var(--muted); font-size: 11px; text-align: center; }
+    .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    [hidden] { display: none !important; }
+
+    @media (max-width: 780px) {
+      .layout { grid-template-columns: 1fr; }
+      .side-stack { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+      .history-card { grid-column: 1 / -1; }
+    }
+    @media (max-width: 560px) {
+      .page { width: min(100% - 22px, 520px); }
+      .topbar { padding-block: 13px; }
+      .top-actions .button { min-height: 37px; padding: 6px 9px; }
+      .hero { padding: 19px 0 18px; }
+      .card { border-radius: 16px; }
+      .card-pad, .goal-card, .history-card { padding: 17px; }
+      .fields { grid-template-columns: 1fr; gap: 11px; }
+      .scale-row { grid-template-columns: 1fr 120px; }
+      .subject-head, .subject-row { grid-template-columns: minmax(100px, 1.3fr) minmax(78px, .8fr) minmax(63px, .65fr) 34px; gap: 6px; }
+      .subject-row input { padding-inline: 8px; font-size: 13px; }
+      .remove-btn { width: 33px; height: 36px; }
+      .side-stack { grid-template-columns: 1fr; }
+      .history-card { grid-column: auto; }
+      .result-number { font-size: 45px; }
+      .card-head { margin-bottom: 14px; }
+    }
+    @media print {
+      body { background: white; }
+      .top-actions, .subject-actions, .suggestions, .remove-btn, .history-header .button, .goal-card { display: none !important; }
+      .page { width: 100%; }
+      .card { box-shadow: none; break-inside: avoid; }
+      .layout { grid-template-columns: 1.4fr .8fr; }
+    }
+  </style>
 </head>
 <body>
-<div class="box">
-  <h1>🎓 حاسبة المعدل السنوي</h1>
-  <p>أدخل درجاتك في المواد الدراسية وشوف معدلك النهائي فوراً!</p>
-  <div class="noprint">
-    <a id="wa" class="btn green" target="_blank">📤 شارك عبر واتساب</a>
-    <button class="gray" id="cp">🔗 انسخ الرابط</button>
-    <label>اسم الطالب</label><input id="student">
-    <label>المرحلة الدراسية</label>
-    <select id="stage"><option>ابتدائي</option><option>إعدادي</option><option>ثانوي</option><option>جامعي</option></select>
-    <p><small id="note"></small></p>
-    <details id="quick">
-      <summary>📚 اختر مواد شائعة لتعبئتها تلقائياً (اختياري)</summary>
-      <p><small>قائمة شائعة للمساعدة السريعة، مو قائمة رسمية من الوزارة — تقدر تعدلها بعدين.</small></p>
-      <div id="chks"></div>
-      <button onclick="fillQuick()">➕ املأ المواد المختارة</button>
-    </details>
-    <label>عدد المواد</label><input id="count" type="number" min="1" max="30" value="5">
-    <div id="subjects"></div>
-    <button onclick="calculate()">احسب المعدل ✅</button>
+  <div class="page">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">م</span>
+        <span>حاسبة المعدل</span>
+      </div>
+      <div class="top-actions">
+        <button class="button" id="shareButton" type="button">مشاركة النتيجة</button>
+        <button class="button" id="printButton" type="button">طباعة</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="pageTitle">
+        <span class="eyebrow">حاسبة دراسية مرنة</span>
+        <h1 id="pageTitle">خطّط لمعدلك، خطوة بخطوة</h1>
+        <p>أدخل درجاتك وأوزان المواد، واعرف معدلك الحالي والدرجة التي تحتاجها لتحقيق هدفك. بياناتك تبقى محفوظة على جهازك.</p>
+      </section>
+
+      <div class="layout">
+        <div class="stack">
+          <section class="card card-pad" aria-labelledby="studentHeading">
+            <div class="card-head">
+              <div>
+                <h2 id="studentHeading">بياناتك الدراسية</h2>
+                <p>اختر الدرجة القصوى التي يعتمدها نظامك الدراسي.</p>
+              </div>
+            </div>
+            <div class="fields">
+              <div class="field">
+                <label for="studentName">اسم الطالب <span class="hint">(اختياري)</span></label>
+                <input id="studentName" type="text" maxlength="60" placeholder="مثال: محمد">
+              </div>
+              <div class="field">
+                <label for="stage">المرحلة الدراسية</label>
+                <select id="stage">
+                  <option value="">اختر المرحلة</option>
+                  <option>ابتدائي</option>
+                  <option>إعدادي</option>
+                  <option>ثانوي</option>
+                  <option>جامعي</option>
+                  <option>أخرى</option>
+                </select>
+              </div>
+            </div>
+            <div class="scale-row">
+              <div>
+                <label class="field-label" for="termName">اسم الفصل أو الفترة</label>
+                <input id="termName" type="text" maxlength="60" placeholder="مثال: الفصل الأول">
+              </div>
+              <div class="field">
+                <label for="maxMark">الدرجة القصوى</label>
+                <input id="maxMark" type="number" min="1" max="10000" step="any" value="100" inputmode="decimal">
+              </div>
+            </div>
+
+            <div class="section-rule"></div>
+            <div class="card-head">
+              <div>
+                <h2>المواد والدرجات</h2>
+                <p>اترك الدرجة فارغة للمواد التي لم تُحتسب بعد.</p>
+              </div>
+            </div>
+            <div class="subject-head" aria-hidden="true">
+              <span>المادة</span><span>الدرجة</span><span>الوزن</span><span></span>
+            </div>
+            <div id="subjects" aria-live="polite"></div>
+            <div class="subject-actions">
+              <button class="button" id="addSubject" type="button">＋ إضافة مادة</button>
+              <button class="button button-quiet" id="resetButton" type="button">مسح الدرجات</button>
+            </div>
+            <div class="section-rule"></div>
+            <div class="field-label">إضافة مادة شائعة</div>
+            <div class="suggestions" id="suggestions">
+              <button class="chip" type="button" data-subject="اللغة العربية">اللغة العربية</button>
+              <button class="chip" type="button" data-subject="اللغة الإنجليزية">اللغة الإنجليزية</button>
+              <button class="chip" type="button" data-subject="الرياضيات">الرياضيات</button>
+              <button class="chip" type="button" data-subject="العلوم">العلوم</button>
+              <button class="chip" type="button" data-subject="التربية الإسلامية">التربية الإسلامية</button>
+              <button class="chip" type="button" data-subject="تقنية المعلومات">تقنية المعلومات</button>
+              <button class="chip" type="button" data-subject="مادة أخرى">مادة أخرى</button>
+            </div>
+          </section>
+        </div>
+
+        <aside class="stack side-stack" aria-label="ملخص المعدل">
+          <section class="card result-card" aria-labelledby="resultHeading" aria-live="polite">
+            <div class="result-top">
+              <h2 id="resultHeading">معدلك الحالي</h2>
+              <div class="result-number"><span id="average">—</span><small id="percentSign"></small></div>
+              <div class="result-copy" id="resultCopy">أدخل درجة مادة واحدة على الأقل لاحتساب معدلك.</div>
+              <div class="progress-track" role="progressbar" aria-label="المعدل الحالي من 100" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress">
+                <div class="progress-fill" id="progressFill"></div>
+              </div>
+            </div>
+            <div class="result-details">
+              <div class="mini-stat"><span>مواد محتسبة</span><strong id="countedCount">0</strong></div>
+              <div class="mini-stat"><span>مجموع الأوزان</span><strong id="weightTotal">0</strong></div>
+            </div>
+            <div class="callout" id="validationMessage" role="status">تُحتسب المواد التي أدخلت درجتها فقط.</div>
+          </section>
+
+          <section class="card goal-card" aria-labelledby="goalHeading">
+            <h2 id="goalHeading">احسب الدرجة المطلوبة</h2>
+            <p>اكتشف متوسط الدرجة المطلوب في المواد المتبقية للوصول إلى هدفك.</p>
+            <div class="goal-fields">
+              <div class="field">
+                <label for="goalPercent">المعدل المستهدف (%)</label>
+                <input id="goalPercent" type="number" min="0" max="100" step="any" value="90" inputmode="decimal">
+              </div>
+              <div class="field">
+                <label for="remainingCount">مواد متبقية</label>
+                <input id="remainingCount" type="number" min="0" max="500" step="1" value="3" inputmode="numeric">
+              </div>
+            </div>
+            <div class="goal-result" id="goalResult" aria-live="polite">أدخل درجاتك وهدفك لحساب المطلوب.</div>
+            <p class="hint" style="margin:10px 0 0">يفترض الحساب أن وزن كل مادة متبقية يساوي 1.</p>
+          </section>
+
+          <section class="card history-card" aria-labelledby="historyHeading">
+            <div class="history-header">
+              <div>
+                <h2 id="historyHeading">مقارنة الفصول</h2>
+                <p>احفظ معدلك لمقارنته بنتائج فصولك الأخرى.</p>
+              </div>
+              <button class="button button-primary button-small" id="saveTerm" type="button" disabled>حفظ الفصل</button>
+            </div>
+            <div class="history-list" id="historyList"></div>
+            <div class="history-compare" id="historyCompare" hidden></div>
+          </section>
+        </aside>
+      </div>
+    </main>
+
+    <footer class="footer">الحسابات تقديرية وفق الدرجات والأوزان التي تدخلها. تحقّق من طريقة الاحتساب المعتمدة لدى مدرستك أو جامعتك.</footer>
   </div>
-  <div id="result"></div>
 
-  <details class="noprint">
-    <summary>🎯 حاسبة الدرجة المطلوبة لتحقيق هدفك</summary>
-    <label>معدلك الحالي (%)</label><input id="gCur" type="number" min="0" max="100" value="0">
-    <label>كم مادة دخلتها لين الحين؟</label><input id="gDone" type="number" min="0" max="30" value="0">
-    <label>كم مادة باقية عليك؟</label><input id="gRem" type="number" min="1" max="30" value="1">
-    <label>المعدل اللي تبيه (%)</label><input id="gTgt" type="number" min="0" max="100" value="90">
-    <button onclick="goal()">احسب المطلوب 🎯</button>
-    <p id="gOut"></p>
-  </details>
+  <script>
+    (() => {
+      "use strict";
 
-  <details class="noprint">
-    <summary>📊 قارن بين فصولك الدراسية</summary>
-    <p><small>الفصول تنحفظ في متصفحك على هذا الجهاز.</small></p>
-    <div class="row"><input class="name" id="sName" placeholder="اسم الفصل"><input id="sAvg" type="number" min="0" max="100" placeholder="المعدل %"></div>
-    <button onclick="addSem()">➕ أضف الفصل</button>
-    <div id="sList"></div>
-  </details>
+      const DRAFT_KEY = "gpa-html-draft-v1";
+      const HISTORY_KEY = "gpa-html-history-v1";
+      const suggestedNames = ["اللغة العربية", "اللغة الإنجليزية", "الرياضيات", "العلوم"];
+      const subjects = document.getElementById("subjects");
+      const maxMarkInput = document.getElementById("maxMark");
+      let history = loadJson(HISTORY_KEY, []);
 
-  <p><small>فالك النجاح 🌟 — من: أبو محمد</small></p>
-</div>
+      function loadJson(key, fallback) {
+        try {
+          const value = JSON.parse(localStorage.getItem(key) || "null");
+          return value == null ? fallback : value;
+        } catch {
+          return fallback;
+        }
+      }
 
-<script>
-const $ = id => document.getElementById(id);
-const pick = a => a[Math.floor(Math.random() * a.length)];
-const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
-const isUni = () => $("stage").value === "جامعي";
-const msgs = {
-  A: ["ما شاء الله! مستوى رهيب 🌟", "أداء ممتاز، فخورين فيك 🏆"],
-  B: ["شغل جميل، خطوة وتوصل للممتاز 👍", "كمّل بنفس الجهد 💫"],
-  C: ["مستوى مقبول، شوية جهد وتتحسن 📘", "ركّز على المواد الصعبة 💡"],
-  D: ["الفصل الجاي فرصتك 💪", "غيّر طريقة مذاكرتك وشوف الفرق 📚"]
-};
-const presets = {
-  "ابتدائي": ["اللغة العربية","اللغة الإنجليزية","الرياضيات","العلوم","التربية الإسلامية","الهوية والمواطنة","تقنية المعلومات","التربية البدنية والصحية","الفنون البصرية","الفنون الموسيقية"],
-  "إعدادي": ["اللغة العربية","اللغة الإنجليزية","الرياضيات","العلوم","التربية الإسلامية","الدراسات الاجتماعية","تقنية المعلومات","التربية البدنية","الفنون"],
-  "ثانوي": ["اللغة العربية","اللغة الإنجليزية","الرياضيات","الفيزياء","الكيمياء","الأحياء","التربية الإسلامية","الدراسات الاجتماعية","تقنية المعلومات"]
-};
-const notes = {
-  "ثانوي": "⚠️ للثانوية العامة والدبلوم: راجع البوابة التعليمية الرسمية لحساب النسبة الدقيقة المعتمدة.",
-  "جامعي": "📚 للجامعيين: أدخل الساعات المعتمدة لكل مادة ليُحسب المعدل المرجّح."
-};
+      function makeRow(name = "", grade = "", weight = 1) {
+        const row = document.createElement("div");
+        row.className = "subject-row";
 
-function buildRows() {
-  const n = Math.min(30, Math.max(1, parseInt($("count").value) || 1));
-  const box = $("subjects");
-  const old = [...box.querySelectorAll(".row")].map(r => [...r.querySelectorAll("input")].map(i => i.value));
-  let html = "";
-  for (let i = 0; i < n; i++) {
-    const v = old[i] || [];
-    html += `<div class="row">
-      <input class="name" placeholder="اسم المادة ${i + 1}" value="${esc(v[0] || "")}">
-      <input class="mark" type="number" min="0" max="100" step="0.5" placeholder="الدرجة" value="${v[1] || ""}">
-      ${isUni() ? `<input class="credit" type="number" min="1" max="6" title="الساعات" value="${v[2] || 3}">` : ""}
-    </div>`;
-  }
-  box.innerHTML = html;
-}
+        const nameInput = document.createElement("input");
+        nameInput.type = "text";
+        nameInput.className = "subject-name";
+        nameInput.maxLength = 60;
+        nameInput.placeholder = "اسم المادة";
+        nameInput.setAttribute("aria-label", "اسم المادة");
+        nameInput.value = name;
 
-function onStage() {
-  const s = $("stage").value;
-  $("note").textContent = notes[s] || "";
-  $("quick").style.display = isUni() ? "none" : "block";
-  $("chks").innerHTML = (presets[s] || []).map(n => `<label class="chk"><input type="checkbox" value="${n}"> ${n}</label>`).join("");
-  buildRows();
-}
+        const gradeInput = document.createElement("input");
+        gradeInput.type = "number";
+        gradeInput.className = "subject-grade";
+        gradeInput.min = "0";
+        gradeInput.step = "any";
+        gradeInput.inputMode = "decimal";
+        gradeInput.placeholder = "—";
+        gradeInput.setAttribute("aria-label", "درجة المادة");
+        gradeInput.value = grade;
 
-function fillQuick() {
-  const picked = [...document.querySelectorAll("#chks input:checked")].map(c => c.value);
-  if (!picked.length) { alert("اختر مادة وحدة على الأقل أول!"); return; }
-  $("count").value = picked.length;
-  buildRows();
-  document.querySelectorAll("#subjects .name").forEach((el, i) => el.value = picked[i] || "");
-}
+        const weightInput = document.createElement("input");
+        weightInput.type = "number";
+        weightInput.className = "subject-weight";
+        weightInput.min = "0.01";
+        weightInput.step = "any";
+        weightInput.inputMode = "decimal";
+        weightInput.value = weight || 1;
+        weightInput.setAttribute("aria-label", "وزن المادة");
 
-function calculate() {
-  const uni = isUni();
-  const rows = [...document.querySelectorAll("#subjects .row")];
-  let totalW = 0, totalC = 0, rowsHtml = "";
-  for (let i = 0; i < rows.length; i++) {
-    const r = rows[i];
-    const subj = r.querySelector(".name").value || ("مادة " + (i + 1));
-    const mark = parseFloat(r.querySelector(".mark").value);
-    const credit = uni ? (parseInt(r.querySelector(".credit").value) || 1) : 1;
-    if (isNaN(mark) || mark < 0) { alert("أدخل درجة صحيحة للمادة: " + subj); return; }
-    if (mark > 100) { alert("⚠️ درجة " + subj + " أكبر من 100! كم عطيت الأستاذ عشان تجيب فوق الـ100؟ 😂"); return; }
-    totalW += mark * credit;
-    totalC += credit;
-    rowsHtml += `<tr><td>${esc(subj)}</td><td>${mark}</td>${uni ? `<td>${credit}</td>` : ""}</tr>`;
-  }
-  const avg = totalW / totalC;
-  let g, t;
-  if (avg >= 90) { g = "A"; t = "ممتاز (A) 🌟"; }
-  else if (avg >= 80) { g = "B"; t = "جيد جداً (B) 👍"; }
-  else if (avg >= 70) { g = "C"; t = "جيد (C) 📘"; }
-  else { g = "D"; t = "تحتاج مزيداً من الاجتهاد 💪"; }
-  const who = esc($("student").value) || "—";
-  const res = $("result");
-  res.style.display = "block";
-  res.innerHTML = `
-    <h2>📊 النتيجة</h2>
-    <p><b>الطالب:</b> ${who} | <b>المرحلة:</b> ${$("stage").value} | ${new Date().toISOString().slice(0, 10)}</p>
-    <table><tr><th>المادة</th><th>الدرجة</th>${uni ? "<th>الساعات</th>" : ""}</tr>${rowsHtml}</table>
-    <p>${uni ? "المعدل المرجّح (من 100)" : "المعدل النهائي"}</p>
-    <p class="big">${avg.toFixed(2)}%</p>
-    <p>التقدير: <b>${t}</b></p>
-    <p>${pick(msgs[g])}</p>
-    <p><small>تقرير غير رسمي — لا يغني عن الشهادة الرسمية. لطلاب الثانوية والدبلوم راجع البوابة التعليمية الرسمية لحساب النسبة الدقيقة.</small></p>
-    <button class="noprint" onclick="window.print()">🖨️ اطبع / احفظ كـ PDF</button>`;
-}
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "remove-btn";
+        remove.setAttribute("aria-label", "حذف المادة");
+        remove.title = "حذف المادة";
+        remove.textContent = "×";
 
-function goal() {
-  const cur = parseFloat($("gCur").value) || 0, done = parseInt($("gDone").value) || 0;
-  const rem = parseInt($("gRem").value) || 0, tgt = parseFloat($("gTgt").value) || 0;
-  if (rem < 1) { alert("لازم يكون فيه مادة باقية على الأقل"); return; }
-  const need = (tgt * (done + rem) - cur * done) / rem;
-  $("gOut").textContent = need > 100
-    ? `⚠️ هدفك غير ممكن رياضياً — تحتاج ${need.toFixed(1)}% وهذا أعلى من 100%.`
-    : need < 0 ? "🎉 مبروك! هدفك محقق حتى لو جبت صفر بالباقي!"
-    : `✅ تحتاج تجيب بالمتوسط ${need.toFixed(1)}% بالمواد الباقية.`;
-}
+        row.append(nameInput, gradeInput, weightInput, remove);
+        return row;
+      }
 
-let sems = [];
-try { sems = JSON.parse(localStorage.getItem("sems")) || []; } catch (e) {}
-function saveSems() { try { localStorage.setItem("sems", JSON.stringify(sems)); } catch (e) {} }
-function drawSems() {
-  $("sList").innerHTML = sems.map((s, i) =>
-    `<div class="bar" style="width:${Math.max(s[1], 12)}%">${esc(s[0])}: ${s[1]}% <a href="#" onclick="delSem(${i});return false">🗑️</a></div>`).join("")
-    + (sems.length ? `<button class="gray" onclick="sems=[];saveSems();drawSems()">🧹 امسح الكل</button>` : "");
-}
-function addSem() {
-  const n = $("sName").value.trim(), a = parseFloat($("sAvg").value);
-  if (!n || isNaN(a) || a < 0 || a > 100) { alert("اكتب اسم الفصل ومعدل بين 0 و 100"); return; }
-  sems.push([n, a]); saveSems(); drawSems();
-  $("sName").value = ""; $("sAvg").value = "";
-}
-function delSem(i) { sems.splice(i, 1); saveSems(); drawSems(); }
+      function getDraft() {
+        return {
+          name: document.getElementById("studentName").value,
+          stage: document.getElementById("stage").value,
+          termName: document.getElementById("termName").value,
+          maxMark: maxMarkInput.value,
+          goalPercent: document.getElementById("goalPercent").value,
+          remainingCount: document.getElementById("remainingCount").value,
+          subjects: Array.from(subjects.querySelectorAll(".subject-row")).map((row) => ({
+            name: row.querySelector(".subject-name").value,
+            grade: row.querySelector(".subject-grade").value,
+            weight: row.querySelector(".subject-weight").value
+          }))
+        };
+      }
 
-$("wa").href = "https://wa.me/?text=" + encodeURIComponent("جرب حاسبة المعدل السنوي: " + location.href);
-$("cp").onclick = () => {
-  navigator.clipboard.writeText(location.href);
-  $("cp").textContent = "✅ تم النسخ!";
-  setTimeout(() => $("cp").textContent = "🔗 انسخ الرابط", 2000);
-};
-$("count").oninput = buildRows;
-$("stage").onchange = onStage;
-onStage();
-drawSems();
-</script>
+      function restoreDraft() {
+        const draft = loadJson(DRAFT_KEY, null);
+        if (draft && typeof draft === "object") {
+          document.getElementById("studentName").value = draft.name || "";
+          document.getElementById("stage").value = draft.stage || "";
+          document.getElementById("termName").value = draft.termName || "";
+          maxMarkInput.value = draft.maxMark || "100";
+          document.getElementById("goalPercent").value = draft.goalPercent || "90";
+          document.getElementById("remainingCount").value = draft.remainingCount ?? "3";
+          const restored = Array.isArray(draft.subjects) ? draft.subjects : [];
+          restored.forEach((item) => subjects.append(makeRow(item.name || "", item.grade || "", item.weight || 1)));
+        }
+        if (!subjects.children.length) suggestedNames.forEach((name) => subjects.append(makeRow(name)));
+      }
+
+      function safeSave(key, value) {
+        try {
+          localStorage.setItem(key, JSON.stringify(value));
+          return true;
+        } catch {
+          return false;
+        }
+      }
+
+      function formatNumber(value, digits = 1) {
+        return new Intl.NumberFormat("ar", { maximumFractionDigits: digits }).format(value);
+      }
+
+      function getCalculation() {
+        const maxMark = Number(maxMarkInput.value);
+        const rows = Array.from(subjects.querySelectorAll(".subject-row"));
+        const entered = [];
+        let invalid = false;
+
+        rows.forEach((row) => {
+          const gradeText = row.querySelector(".subject-grade").value.trim();
+          if (gradeText === "") return;
+          const grade = Number(gradeText);
+          const weight = Number(row.querySelector(".subject-weight").value);
+          if (!Number.isFinite(grade) || !Number.isFinite(weight) || grade < 0 || grade > maxMark || weight <= 0) {
+            invalid = true;
+            return;
+          }
+          entered.push({ grade, weight });
+        });
+
+        const totalWeight = entered.reduce((sum, item) => sum + item.weight, 0);
+        const weightedMarks = entered.reduce((sum, item) => sum + item.grade * item.weight, 0);
+        const averageMark = totalWeight ? weightedMarks / totalWeight : null;
+        const percentage = averageMark !== null && maxMark > 0 ? (averageMark / maxMark) * 100 : null;
+        return { maxMark, entered, totalWeight, weightedMarks, averageMark, percentage, invalid };
+      }
+
+      function update() {
+        const calculation = getCalculation();
+        const { maxMark, entered, totalWeight, averageMark, percentage, invalid } = calculation;
+        const averageEl = document.getElementById("average");
+        const percentSign = document.getElementById("percentSign");
+        const resultCopy = document.getElementById("resultCopy");
+        const progress = document.getElementById("progress");
+        const progressFill = document.getElementById("progressFill");
+        const validMax = Number.isFinite(maxMark) && maxMark > 0;
+
+        if (validMax && percentage !== null) {
+          averageEl.textContent = formatNumber(percentage);
+          percentSign.textContent = "%";
+          resultCopy.textContent = `يعادل ${formatNumber(averageMark)} من ${formatNumber(maxMark)}.`;
+          progressFill.style.width = `${Math.max(0, Math.min(100, percentage))}%`;
+          progress.setAttribute("aria-valuenow", String(Math.max(0, Math.min(100, percentage)).toFixed(1)));
+        } else {
+          averageEl.textContent = "—";
+          percentSign.textContent = "";
+          resultCopy.textContent = validMax ? "أدخل درجة مادة واحدة على الأقل لاحتساب معدلك." : "أدخل درجة قصوى صحيحة أكبر من صفر.";
+          progressFill.style.width = "0%";
+          progress.setAttribute("aria-valuenow", "0");
+        }
+
+        document.getElementById("countedCount").textContent = formatNumber(entered.length, 0);
+        document.getElementById("weightTotal").textContent = formatNumber(totalWeight);
+        const message = document.getElementById("validationMessage");
+        if (!validMax) message.textContent = "يجب أن تكون الدرجة القصوى أكبر من صفر.";
+        else if (invalid) message.textContent = `تحقّق من الدرجات والأوزان: الدرجة بين 0 و${formatNumber(maxMark)}، والوزن أكبر من صفر.`;
+        else message.textContent = "تُحتسب المواد التي أدخلت درجتها فقط. يُحسب المعدل وفق أوزان المواد.";
+
+        const remaining = Number(document.getElementById("remainingCount").value);
+        const targetPct = Number(document.getElementById("goalPercent").value);
+        const goalResult = document.getElementById("goalResult");
+        if (percentage === null || invalid || !validMax || !Number.isFinite(targetPct) || targetPct < 0 || targetPct > 100 || !Number.isFinite(remaining) || remaining < 0) {
+          goalResult.textContent = "أدخل درجات صحيحة وهدفًا بين 0 و100 لحساب المطلوب.";
+        } else if (remaining === 0) {
+          goalResult.textContent = percentage >= targetPct
+            ? "حققت المعدل المستهدف بناءً على الدرجات الحالية."
+            : "لا توجد مواد متبقية لإكمال الحساب. أضف عدد المواد المتبقية.";
+        } else {
+          const targetMark = (targetPct / 100) * maxMark;
+          const needed = (targetMark * (totalWeight + remaining) - calculation.weightedMarks) / remaining;
+          if (needed <= 0) {
+            goalResult.innerHTML = "<strong>وصلت إلى هدفك</strong>معدلك الحالي يحقق الهدف بالفعل.";
+          } else if (needed > maxMark) {
+            goalResult.innerHTML = "<strong>الهدف غير ممكن حاليًا</strong>حتى الدرجة الكاملة في المواد المتبقية لن تكفي.";
+          } else {
+            goalResult.innerHTML = `<strong>${formatNumber(needed)} من ${formatNumber(maxMark)}</strong>متوسط الدرجة المطلوب في كل مادة متبقية.`;
+          }
+        }
+
+        document.getElementById("saveTerm").disabled = percentage === null || invalid || !validMax;
+        safeSave(DRAFT_KEY, getDraft());
+      }
+
+      function renderHistory() {
+        const list = document.getElementById("historyList");
+        const compare = document.getElementById("historyCompare");
+        list.replaceChildren();
+        const validHistory = Array.isArray(history) ? history.filter((item) => item && Number.isFinite(item.percentage)) : [];
+
+        if (!validHistory.length) {
+          const empty = document.createElement("div");
+          empty.className = "history-empty";
+          empty.textContent = "لم تحفظ أي فصل بعد. ستظهر المقارنة هنا.";
+          list.append(empty);
+          compare.hidden = true;
+          return;
+        }
+
+        validHistory.forEach((item) => {
+          const row = document.createElement("div");
+          row.className = "history-item";
+          const details = document.createElement("div");
+          const title = document.createElement("strong");
+          title.textContent = item.termName || "فصل دراسي";
+          const subtitle = document.createElement("small");
+          subtitle.textContent = [item.studentName, item.stage].filter(Boolean).join(" · ") || "نتيجة محفوظة على هذا الجهاز";
+          details.append(title, subtitle);
+
+          const score = document.createElement("span");
+          score.className = "history-score";
+          score.textContent = `${formatNumber(item.percentage)}%`;
+
+          const remove = document.createElement("button");
+          remove.className = "remove-btn";
+          remove.type = "button";
+          remove.textContent = "×";
+          remove.title = "حذف الفصل المحفوظ";
+          remove.setAttribute("aria-label", `حذف ${item.termName || "الفصل"}`);
+          remove.addEventListener("click", () => {
+            history = history.filter((entry) => entry.id !== item.id);
+            safeSave(HISTORY_KEY, history);
+            renderHistory();
+          });
+          row.append(details, score, remove);
+          list.append(row);
+        });
+
+        if (validHistory.length >= 2) {
+          const sorted = [...validHistory].sort((a, b) => b.percentage - a.percentage);
+          compare.textContent = `أعلى معدل محفوظ: ${sorted[0].termName || "فصل دراسي"} — ${formatNumber(sorted[0].percentage)}%.`;
+          compare.hidden = false;
+        } else compare.hidden = true;
+      }
+
+      function addSubject(name = "") {
+        const row = makeRow(name);
+        subjects.append(row);
+        row.querySelector(".subject-name").focus();
+        update();
+      }
+
+      subjects.addEventListener("input", update);
+      subjects.addEventListener("click", (event) => {
+        const button = event.target.closest(".remove-btn");
+        if (button) {
+          button.closest(".subject-row").remove();
+          update();
+        }
+      });
+      document.querySelectorAll("input, select").forEach((field) => field.addEventListener("input", update));
+      document.querySelectorAll("select").forEach((field) => field.addEventListener("change", update));
+      document.getElementById("addSubject").addEventListener("click", () => addSubject());
+      document.getElementById("suggestions").addEventListener("click", (event) => {
+        const button = event.target.closest("[data-subject]");
+        if (!button) return;
+        const name = button.dataset.subject;
+        const exists = Array.from(subjects.querySelectorAll(".subject-name")).some((input) => input.value.trim() === name);
+        if (exists) {
+          const existing = Array.from(subjects.querySelectorAll(".subject-name")).find((input) => input.value.trim() === name);
+          existing.focus();
+          existing.setSelectionRange(existing.value.length, existing.value.length);
+          return;
+        }
+        addSubject(name);
+      });
+      document.getElementById("resetButton").addEventListener("click", () => {
+        subjects.replaceChildren();
+        suggestedNames.forEach((name) => subjects.append(makeRow(name)));
+        update();
+      });
+      document.getElementById("saveTerm").addEventListener("click", () => {
+        const calculation = getCalculation();
+        if (calculation.percentage === null || calculation.invalid) return;
+        const record = {
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          termName: document.getElementById("termName").value.trim() || `فصل ${history.length + 1}`,
+          studentName: document.getElementById("studentName").value.trim(),
+          stage: document.getElementById("stage").value,
+          percentage: calculation.percentage,
+          savedAt: new Date().toISOString()
+        };
+        history = [record, ...(Array.isArray(history) ? history : [])].slice(0, 20);
+        safeSave(HISTORY_KEY, history);
+        renderHistory();
+      });
+      document.getElementById("printButton").addEventListener("click", () => window.print());
+      document.getElementById("shareButton").addEventListener("click", () => {
+        const calculation = getCalculation();
+        if (calculation.percentage === null || calculation.invalid) {
+          document.getElementById("resultCopy").textContent = "أدخل درجات صحيحة أولًا لمشاركة النتيجة.";
+          return;
+        }
+        const name = document.getElementById("studentName").value.trim();
+        const text = `${name ? `نتيجة ${name}: ` : ""}معدلي ${formatNumber(calculation.percentage)}% (${formatNumber(calculation.averageMark)} من ${formatNumber(calculation.maxMark)}).`;
+        const url = `https://wa.me/?text=${encodeURIComponent(`${text} ${location.href}`)}`;
+        window.open(url, "_blank", "noopener,noreferrer");
+      });
+
+      restoreDraft();
+      renderHistory();
+      update();
+    })();
+  </script>
 </body>
 </html>
