@@ -1,3 +1,6 @@
+انسخ الكود كاملًا من بداية `<!doctype html>` إلى نهاية `</html>`، والصقه بدل محتوى `index.html` في GitHub:
+
+```html
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
@@ -6,6 +9,13 @@
   <meta name="theme-color" content="#f5f7f2">
   <meta name="description" content="احسب معدلك الدراسي، جرّب درجاتك، وقارن بين فصولك الدراسية.">
   <title>حاسبة المعدل الدراسي</title>
+  <script>
+    try {
+      if (JSON.parse(localStorage.getItem("gpa-html-theme-v1")) === "dark") {
+        document.documentElement.dataset.theme = "dark";
+      }
+    } catch {}
+  </script>
   <style>
     :root {
       color-scheme: light;
@@ -20,6 +30,21 @@
       --amber: #fff4dd;
       --red: #a43e36;
       --shadow: 0 14px 40px rgba(29, 54, 38, .065);
+    }
+
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --ink: #e5eee7;
+      --muted: #a8b7ac;
+      --green: #65cf9b;
+      --green-dark: #78dbab;
+      --mint: #1d3528;
+      --paper: #19231c;
+      --canvas: #101711;
+      --line: #304035;
+      --amber: #3c321f;
+      --red: #ff9388;
+      --shadow: 0 14px 40px rgba(0, 0, 0, .22);
     }
 
     * { box-sizing: border-box; }
@@ -53,6 +78,7 @@
       font-size: 19px;
     }
     .top-actions { display: flex; gap: 9px; }
+    .theme-toggle { width: 42px; padding: 0; font-size: 19px; }
     .hero { padding: 28px 0 24px; }
     .eyebrow {
       display: inline-flex;
@@ -93,6 +119,12 @@
     }
     input:focus, select:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(23, 107, 75, .12); }
     input::placeholder { color: #a0aaa1; }
+    [data-theme="dark"] input, [data-theme="dark"] select {
+      border-color: var(--line);
+      background: #18221c;
+      color: var(--ink);
+    }
+    [data-theme="dark"] input::placeholder { color: #829087; }
     .scale-row { display: grid; grid-template-columns: 1fr 145px; align-items: end; gap: 14px; margin-top: 14px; }
     .hint { color: var(--muted); font-size: 12px; }
     .section-rule { height: 1px; margin: 20px 0 16px; background: var(--line); }
@@ -181,6 +213,19 @@
     .history-empty { padding: 17px 12px; border: 1px dashed #cfd9d0; border-radius: 12px; color: var(--muted); font-size: 12px; text-align: center; }
     .history-compare { margin-top: 12px; padding: 11px 12px; border-radius: 11px; background: var(--mint); color: #315a40; font-size: 12px; }
     .footer { padding: 0 0 25px; color: var(--muted); font-size: 11px; text-align: center; }
+    [data-theme="dark"] .result-top { background: linear-gradient(145deg, #1c382a, #1b2820); }
+    [data-theme="dark"] .result-copy { color: #afcbb7; }
+    [data-theme="dark"] .chip { border-color: #354d3d; background: #1b2b21; color: #c2dfca; }
+    [data-theme="dark"] .chip:hover { border-color: #527b61; background: #233a2b; }
+    [data-theme="dark"] .goal-result { color: #f0d99f; }
+    [data-theme="dark"] .callout { background: #202a23; }
+    [data-theme="dark"] .history-compare { color: #c3dfca; }
+    [data-theme="dark"] .button { border-color: var(--line); background: var(--paper); color: var(--ink); }
+    [data-theme="dark"] .button-primary { border-color: var(--green); background: var(--green); color: #102018; }
+    [data-theme="dark"] .button-quiet { border-color: transparent; background: transparent; color: var(--muted); }
+    [data-theme="dark"] .brand-mark { color: #102018; }
+    [data-theme="dark"] .remove-btn { color: #a8b7ac; }
+    [data-theme="dark"] .remove-btn:hover { border-color: #69413d; background: #342321; color: var(--red); }
     .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
     [hidden] { display: none !important; }
 
@@ -212,6 +257,22 @@
       .page { width: 100%; }
       .card { box-shadow: none; break-inside: avoid; }
       .layout { grid-template-columns: 1.4fr .8fr; }
+      :root[data-theme="dark"] {
+        color-scheme: light;
+        --ink: #17271f;
+        --muted: #66736a;
+        --green: #176b4b;
+        --green-dark: #10543a;
+        --mint: #e8f4ec;
+        --paper: #ffffff;
+        --canvas: #ffffff;
+        --line: #e2e8e0;
+        --amber: #fff4dd;
+        --shadow: none;
+      }
+      [data-theme="dark"] input, [data-theme="dark"] select { background: #fff; color: #17271f; }
+      [data-theme="dark"] .result-top { background: #eaf5ed; }
+      [data-theme="dark"] .result-copy { color: #526b5b; }
     }
   </style>
 </head>
@@ -223,6 +284,7 @@
         <span>حاسبة المعدل</span>
       </div>
       <div class="top-actions">
+        <button class="button theme-toggle" id="themeToggle" type="button" aria-label="التبديل إلى المظهر الداكن" title="التبديل إلى المظهر الداكن">☾</button>
         <button class="button" id="shareButton" type="button">مشاركة النتيجة</button>
         <button class="button" id="printButton" type="button">طباعة</button>
       </div>
@@ -359,6 +421,7 @@
 
       const DRAFT_KEY = "gpa-html-draft-v1";
       const HISTORY_KEY = "gpa-html-history-v1";
+      const THEME_KEY = "gpa-html-theme-v1";
       const suggestedNames = ["اللغة العربية", "اللغة الإنجليزية", "الرياضيات", "العلوم"];
       const subjects = document.getElementById("subjects");
       const maxMarkInput = document.getElementById("maxMark");
@@ -453,6 +516,17 @@
         } catch {
           return false;
         }
+      }
+
+      function setTheme(theme, persist = true) {
+        const dark = theme === "dark";
+        document.documentElement.dataset.theme = dark ? "dark" : "light";
+        const toggle = document.getElementById("themeToggle");
+        toggle.textContent = dark ? "☀" : "☾";
+        toggle.setAttribute("aria-label", dark ? "التبديل إلى المظهر الفاتح" : "التبديل إلى المظهر الداكن");
+        toggle.title = dark ? "التبديل إلى المظهر الفاتح" : "التبديل إلى المظهر الداكن";
+        document.querySelector('meta[name="theme-color"]').content = dark ? "#101711" : "#f5f7f2";
+        if (persist) safeSave(THEME_KEY, dark ? "dark" : "light");
       }
 
       function formatNumber(value, digits = 1) {
@@ -643,6 +717,10 @@
         renderHistory();
       });
       document.getElementById("printButton").addEventListener("click", () => window.print());
+      document.getElementById("themeToggle").addEventListener("click", () => {
+        const isDark = document.documentElement.dataset.theme === "dark";
+        setTheme(isDark ? "light" : "dark");
+      });
       document.getElementById("shareButton").addEventListener("click", () => {
         const calculation = getCalculation();
         if (calculation.percentage === null || calculation.invalid) {
@@ -657,8 +735,10 @@
 
       restoreDraft();
       renderHistory();
+      setTheme(document.documentElement.dataset.theme === "dark" ? "dark" : "light", false);
       update();
     })();
   </script>
 </body>
 </html>
+```
