@@ -193,6 +193,9 @@
     .mini-stat span { display: block; color: var(--muted); font-size: 11px; }
     .mini-stat strong { display: block; margin-top: 2px; font-size: 17px; }
     .callout { margin: 0 20px 18px; padding: 10px 12px; border-radius: 11px; background: #f6f8f5; color: var(--muted); font-size: 12px; }
+    .smart-card { padding: 17px 19px; border-inline-start: 4px solid var(--green); background: linear-gradient(135deg, var(--paper), var(--mint)); }
+    .smart-card h2 { margin: 0 0 5px; font-size: 15px; }
+    .smart-summary { margin: 0; color: var(--muted); font-size: 13px; }
     .impact-card { padding: 19px; }
     .impact-card h2 { margin: 0; font-size: 17px; }
     .impact-card > p { margin: 5px 0 13px; color: var(--muted); font-size: 12px; }
@@ -409,6 +412,11 @@
               <div class="mini-stat"><span>مجموع الأوزان</span><strong id="weightTotal">0</strong></div>
             </div>
             <div class="callout" id="validationMessage" role="status">تُحتسب المواد التي أدخلت درجتها فقط.</div>
+          </section>
+
+          <section class="card smart-card" aria-labelledby="smartHeading">
+            <h2 id="smartHeading">خلاصة ذكية</h2>
+            <p class="smart-summary" id="smartSummary" aria-live="polite">أدخل درجاتك وهدفك لأقترح لك أفضل خطوة.</p>
           </section>
 
           <section class="card impact-card" aria-labelledby="impactHeading">
@@ -710,6 +718,21 @@
         }));
       }
 
+      function getImpactRanking(calculation) {
+        if (!calculation.entered.length || calculation.invalid || calculation.maxMark <= 0) return [];
+
+        return calculation.entered
+          .map((course) => {
+            const increase = Math.min(5, calculation.maxMark - course.grade);
+            const impact = calculation.totalWeight
+              ? (increase * course.weight / calculation.totalWeight / calculation.maxMark) * 100
+              : 0;
+            return { ...course, increase, impact };
+          })
+          .filter((course) => course.increase > 0)
+          .sort((a, b) => b.impact - a.impact);
+      }
+
       function renderImpact(calculation) {
         const list = document.getElementById("impactList");
         list.replaceChildren();
@@ -724,17 +747,7 @@
           return;
         }
 
-        const mostImpactful = calculation.entered
-          .map((course) => {
-            const increase = Math.min(5, calculation.maxMark - course.grade);
-            const impact = calculation.totalWeight
-              ? (increase * course.weight / calculation.totalWeight / calculation.maxMark) * 100
-              : 0;
-            return { ...course, increase, impact };
-          })
-          .filter((course) => course.increase > 0)
-          .sort((a, b) => b.impact - a.impact)
-          .slice(0, 3);
+        const mostImpactful = getImpactRanking(calculation).slice(0, 3);
 
         if (!mostImpactful.length) {
           const empty = document.createElement("div");
@@ -761,6 +774,45 @@
           row.append(details, value);
           list.append(row);
         });
+      }
+
+      function buildSmartSummary(calculation, summary) {
+        const bestCourse = getImpactRanking(calculation)[0];
+
+        if (summary.status === "invalid") {
+          return "راجع الدرجة القصوى والدرجات والأوزان غير الصحيحة لأعطيك خلاصة دقيقة.";
+        }
+        if (summary.status === "planInvalid") {
+          return "أكمل توقعات الدرجات والأوزان في الخطة الشخصية لتظهر لك خلاصة دقيقة.";
+        }
+        if (summary.status === "needsData") {
+          return "أدخل درجة مادة واحدة على الأقل، أو أضف توقعات المواد القادمة، لأقترح لك أفضل خطوة.";
+        }
+        if (summary.status === "remainingInvalid") {
+          return "أدخل عددًا صحيحًا للمواد المتبقية أو حدّدها في الخطة الشخصية.";
+        }
+        if (summary.status === "noFuture") {
+          return "أضف عدد المواد المتبقية لحساب الطريق إلى هدفك.";
+        }
+        if (summary.status === "reached") {
+          const current = calculation.percentage === null ? summary.targetPct : calculation.percentage;
+          return bestCourse
+            ? `ممتاز، معدلك ${formatNumber(current)}% يحقق هدفك ${formatNumber(summary.targetPct)}%؛ ولتحسينه أكثر ابدأ بمادة ${bestCourse.name}، فرفعها ${formatNumber(bestCourse.increase)} درجات قد يضيف ${formatNumber(bestCourse.impact)} نقطة مئوية.`
+            : `ممتاز، معدلك ${formatNumber(current)}% حقق هدفك ${formatNumber(summary.targetPct)}%، وقد وصلت درجاتك المحتسبة إلى الحد الأعلى.`;
+        }
+        if (summary.status === "impossible") {
+          return `هدف ${formatNumber(summary.targetPct)}% غير ممكن حاليًا؛ أقصى معدل مع الدرجة الكاملة في المواد المتبقية هو ${formatNumber(summary.maxPossible)}%.`;
+        }
+        if (summary.status === "feasible") {
+          return bestCourse
+            ? `للوصول إلى ${formatNumber(summary.targetPct)}% تحتاج متوسط ${formatNumber(summary.neededAverage)} من ${formatNumber(calculation.maxMark)} في المواد المتبقية؛ وأكثر مادة حالية يمكن أن تحسّن المعدل هي ${bestCourse.name}، فرفعها ${formatNumber(bestCourse.increase)} درجات قد يضيف ${formatNumber(bestCourse.impact)} نقطة مئوية.`
+            : `للوصول إلى ${formatNumber(summary.targetPct)}% تحتاج متوسط ${formatNumber(summary.neededAverage)} من ${formatNumber(calculation.maxMark)} في المواد المتبقية.`;
+        }
+        return "أدخل درجاتك وهدفك لأقترح لك أفضل خطوة.";
+      }
+
+      function renderSmartSummary(calculation, summary) {
+        document.getElementById("smartSummary").textContent = buildSmartSummary(calculation, summary);
       }
 
       function showGoalResult(title, description = "") {
@@ -835,15 +887,25 @@
         const planOutput = document.getElementById("planOutput");
         const personalPlan = getPlannedCourses(maxMark);
         const hasPersonalPlan = personalPlan.courses.length > 0;
+        const smartSummaryState = {
+          status: "waiting",
+          targetPct,
+          neededAverage: null,
+          maxPossible: null
+        };
         planOutput.hidden = true;
 
         if (!validMax || invalid || !Number.isFinite(targetPct) || targetPct < 0 || targetPct > 100) {
+          smartSummaryState.status = "invalid";
           showGoalResult("أدخل درجات صحيحة وهدفًا بين 0 و100 لحساب المطلوب.");
         } else if (personalPlan.invalid) {
+          smartSummaryState.status = "planInvalid";
           showGoalResult("أكمل بيانات الخطة", `أدخل توقعًا بين 0 و${formatNumber(maxMark)} ووزنًا أكبر من صفر لكل مادة بدأت بإضافتها.`);
         } else if (!entered.length && !hasPersonalPlan) {
+          smartSummaryState.status = "needsData";
           showGoalResult("أدخل درجاتك أو أضف موادك المتبقية بالخطة.");
         } else if (!hasPersonalPlan && (!Number.isInteger(remaining) || remaining < 0)) {
+          smartSummaryState.status = "remainingInvalid";
           showGoalResult("أدخل عددًا صحيحًا للمواد المتبقية.");
         } else {
           const futureCourses = hasPersonalPlan
@@ -856,25 +918,36 @@
           const futureWeight = futureCourses.reduce((sum, course) => sum + course.weight, 0);
 
           if (futureWeight === 0) {
-            showGoalResult(percentage !== null && percentage >= targetPct
-              ? "حققت المعدل المستهدف بناءً على الدرجات الحالية."
-              : "لا توجد مواد متبقية لإكمال الحساب. أضف عدد المواد المتبقية.");
+            if (percentage !== null && percentage >= targetPct) {
+              smartSummaryState.status = "reached";
+              showGoalResult("حققت المعدل المستهدف بناءً على الدرجات الحالية.");
+            } else {
+              smartSummaryState.status = "noFuture";
+              showGoalResult("لا توجد مواد متبقية لإكمال الحساب. أضف عدد المواد المتبقية.");
+            }
           } else {
             const targetMark = (targetPct / 100) * maxMark;
             const requiredWeightedMarks = targetMark * (totalWeight + futureWeight) - calculation.weightedMarks;
             const neededAverage = requiredWeightedMarks / futureWeight;
 
             if (neededAverage <= 0) {
+              smartSummaryState.status = "reached";
               showGoalResult("وصلت إلى هدفك", "معدلك الحالي يحقق الهدف بالفعل.");
             } else if (neededAverage > maxMark) {
+              smartSummaryState.status = "impossible";
+              smartSummaryState.maxPossible = ((calculation.weightedMarks + futureWeight * maxMark) / (totalWeight + futureWeight) / maxMark) * 100;
               showGoalResult("الهدف غير ممكن حاليًا", "حتى الدرجة الكاملة في المواد المتبقية لن تكفي.");
             } else if (hasPersonalPlan) {
+              smartSummaryState.status = "feasible";
+              smartSummaryState.neededAverage = neededAverage;
               showGoalResult(
                 `المتوسط المطلوب ${formatNumber(neededAverage)} من ${formatNumber(maxMark)}`,
                 "هذه أهداف مقترحة موزعة بحسب توقعك لكل مادة وأوزانها."
               );
               renderPlanOutput(distributeTargets(personalPlan.courses, requiredWeightedMarks, maxMark));
             } else {
+              smartSummaryState.status = "feasible";
+              smartSummaryState.neededAverage = neededAverage;
               showGoalResult(
                 `${formatNumber(neededAverage)} من ${formatNumber(maxMark)}`,
                 "هذا متوسط الدرجة المطلوب في كل مادة متبقية."
@@ -883,6 +956,7 @@
           }
         }
 
+        renderSmartSummary(calculation, smartSummaryState);
         document.getElementById("saveTerm").disabled = percentage === null || invalid || !validMax;
         safeSave(DRAFT_KEY, getDraft());
       }
@@ -1030,4 +1104,3 @@
   </script>
 </body>
 </html>
-```
