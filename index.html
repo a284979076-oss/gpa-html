@@ -196,6 +196,17 @@
     .smart-card { padding: 17px 19px; border-inline-start: 4px solid var(--green); background: linear-gradient(135deg, var(--paper), var(--mint)); }
     .smart-card h2 { margin: 0 0 5px; font-size: 15px; }
     .smart-summary { margin: 0; color: var(--muted); font-size: 13px; }
+    .advice-card { padding: 18px; }
+    .advice-card h2 { margin: 0; font-size: 16px; }
+    .advice-card > p { margin: 4px 0 12px; color: var(--muted); font-size: 12px; }
+    .advice-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+    .advice-tab { min-height: 39px; padding: 5px 4px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); color: var(--muted); font-size: 11px; font-weight: 700; }
+    .advice-tab[aria-pressed="true"] { border-color: var(--green); background: var(--mint); color: var(--green-dark); }
+    .advice-tip { min-height: 96px; margin-top: 10px; padding: 11px 12px; border-radius: 11px; background: var(--mint); }
+    .advice-tip strong { display: block; color: var(--green-dark); font-size: 13px; }
+    .advice-tip p { margin: 4px 0 0; color: var(--ink); font-size: 12px; }
+    .advice-actions { margin-top: 9px; }
+    .advice-footnote { margin: 9px 0 0 !important; font-size: 10px !important; }
     .impact-card { padding: 19px; }
     .impact-card h2 { margin: 0; font-size: 17px; }
     .impact-card > p { margin: 5px 0 13px; color: var(--muted); font-size: 12px; }
@@ -419,6 +430,24 @@
             <p class="smart-summary" id="smartSummary" aria-live="polite">أدخل درجاتك وهدفك لأقترح لك أفضل خطوة.</p>
           </section>
 
+          <section class="card advice-card" aria-labelledby="adviceHeading">
+            <h2 id="adviceHeading">مساند الامتحان</h2>
+            <p>اختر الموقف لتظهر لك نصيحة عملية قصيرة.</p>
+            <div class="advice-tabs" id="adviceTabs" role="group" aria-label="اختر وقت النصيحة">
+              <button class="advice-tab" type="button" data-advice="night" aria-pressed="true">ليلة الامتحان</button>
+              <button class="advice-tab" type="button" data-advice="stress" aria-pressed="false">أشعر بالتوتر</button>
+              <button class="advice-tab" type="button" data-advice="during" aria-pressed="false">أثناء الامتحان</button>
+            </div>
+            <div class="advice-tip" aria-live="polite">
+              <strong id="adviceTitle">جهّز أغراضك مبكرًا</strong>
+              <p id="adviceText">ضع أدوات الامتحان وجهّز ما تحتاجه من الليلة السابقة لتبدأ صباحك بهدوء.</p>
+            </div>
+            <div class="advice-actions">
+              <button class="button button-small" id="nextAdvice" type="button">نصيحة أخرى</button>
+            </div>
+            <p class="advice-footnote">هذه إرشادات عامة؛ إذا كان التوتر شديدًا أو مستمرًا، تحدّث مع شخص تثق به أو اطلب دعمًا مختصًا.</p>
+          </section>
+
           <section class="card impact-card" aria-labelledby="impactHeading">
             <h2 id="impactHeading">المادة الأكثر تأثيرًا</h2>
             <p>تعرّف على المواد التي يمكن أن ترفع معدلك أكثر إذا حسّنت درجتها.</p>
@@ -485,6 +514,25 @@
       const HISTORY_KEY = "gpa-html-history-v1";
       const THEME_KEY = "gpa-html-theme-v1";
       const suggestedNames = ["اللغة العربية", "اللغة الإنجليزية", "الرياضيات", "العلوم"];
+      const examAdvice = {
+        night: [
+          { title: "جهّز أغراضك مبكرًا", text: "ضع أدوات الامتحان وجهّز ما تحتاجه من الليلة السابقة لتبدأ صباحك بهدوء." },
+          { title: "راجع الأساسيات ثم خذ قسطًا من الراحة", text: "اكتفِ بمراجعة قصيرة للنقاط المهمة، وحدد وقتًا للنوم بدل مواصلة المذاكرة حتى وقت متأخر." },
+          { title: "خفف ضغط الصباح", text: "تأكد من وقت ومكان الامتحان، واضبط المنبه، واترك لنفسك وقتًا كافيًا للوصول." }
+        ],
+        stress: [
+          { title: "هدّئ تنفسك لدقيقة", text: "خذ شهيقًا هادئًا لأربع ثوانٍ، ثم أخرج النفس ببطء لست ثوانٍ، وكرر ذلك عدة مرات." },
+          { title: "حوّل القلق إلى خطوة صغيرة", text: "سمِّ الشيء الذي يقلقك، ثم اختر خطوة واحدة تستطيع فعلها الآن، مثل مراجعة نقطة أو تجهيز أدواتك." },
+          { title: "ابدأ من سؤال تعرفه", text: "لا تحتاج إلى حل كل شيء دفعة واحدة؛ ابدأ بمهمة صغيرة وواضحة ثم انتقل لما بعدها." }
+        ],
+        during: [
+          { title: "اقرأ التعليمات أولًا", text: "خذ لحظة لفهم المطلوب، ثم وزّع وقتك على الأسئلة قبل أن تبدأ بالإجابة." },
+          { title: "ابدأ بما تعرفه", text: "حلّ الأسئلة الواضحة أولًا، وضع علامة على السؤال الصعب لتعود إليه لاحقًا." },
+          { title: "إذا علقت، انتقل مؤقتًا", text: "خذ نفسًا هادئًا، واكتب ما تتذكره من أفكار، ثم انتقل لسؤال آخر وارجع إليه لاحقًا." }
+        ]
+      };
+      let activeAdviceCategory = "night";
+      const adviceIndexes = { night: 0, stress: 0, during: 0 };
       const subjects = document.getElementById("subjects");
       const plannedSubjects = document.getElementById("plannedSubjects");
       const maxMarkInput = document.getElementById("maxMark");
@@ -815,6 +863,15 @@
         document.getElementById("smartSummary").textContent = buildSmartSummary(calculation, summary);
       }
 
+      function renderExamAdvice() {
+        const advice = examAdvice[activeAdviceCategory][adviceIndexes[activeAdviceCategory]];
+        document.getElementById("adviceTitle").textContent = advice.title;
+        document.getElementById("adviceText").textContent = advice.text;
+        document.querySelectorAll("[data-advice]").forEach((button) => {
+          button.setAttribute("aria-pressed", String(button.dataset.advice === activeAdviceCategory));
+        });
+      }
+
       function showGoalResult(title, description = "") {
         const result = document.getElementById("goalResult");
         result.replaceChildren();
@@ -1042,6 +1099,17 @@
           update();
         }
       });
+      document.getElementById("adviceTabs").addEventListener("click", (event) => {
+        const button = event.target.closest("[data-advice]");
+        if (!button) return;
+        activeAdviceCategory = button.dataset.advice;
+        renderExamAdvice();
+      });
+      document.getElementById("nextAdvice").addEventListener("click", () => {
+        const tips = examAdvice[activeAdviceCategory];
+        adviceIndexes[activeAdviceCategory] = (adviceIndexes[activeAdviceCategory] + 1) % tips.length;
+        renderExamAdvice();
+      });
       document.querySelectorAll("input, select").forEach((field) => field.addEventListener("input", update));
       document.querySelectorAll("select").forEach((field) => field.addEventListener("change", update));
       document.getElementById("addSubject").addEventListener("click", () => addSubject());
@@ -1098,6 +1166,7 @@
 
       restoreDraft();
       renderHistory();
+      renderExamAdvice();
       setTheme(document.documentElement.dataset.theme === "dark" ? "dark" : "light", false);
       update();
     })();
