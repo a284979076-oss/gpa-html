@@ -1,3 +1,7 @@
+معك حق. كان الأفضل أعطيك الملف كاملًا من البداية. **انسخ الكود الأول كاملًا بدل محتوى `index.html` في GitHub**، ثم أنشئ بجانبه ملفًا ثانيًا اسمه `favicon.svg` والصق فيه الكود الموجود بعده.
+
+### `index.html`
+```html
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
@@ -5,6 +9,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f5f7f2">
   <meta name="description" content="احسب معدلك الدراسي، جرّب درجاتك، وقارن بين فصولك الدراسية.">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=1">
   <title>حاسبة المعدل الدراسي</title>
   <script>
     try {
@@ -1173,3 +1178,16 @@
   </script>
 </body>
 </html>
+```
+
+### `favicon.svg`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect x="2" y="2" width="60" height="60" rx="18" fill="#176b4b"/>
+  <g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
+    <path d="M10 25 32 14l22 11-22 11L10 25Z"/>
+    <path d="M19 30v12c7 5 19 5 26 0V30"/>
+    <path d="M54 25v13"/>
+  </g>
+</svg>
+```
